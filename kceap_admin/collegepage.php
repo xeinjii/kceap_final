@@ -30,8 +30,7 @@ require_once '../config/config.php';
                     </div>
 
                     <div class="col-md-3">
-                        <a href="../kceap_admin/COLLEGE/set_schedule.php" class="text-decoration-none text-reset"
-                            data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                        <a href="../kceap_admin/COLLEGE/set_schedule.php" class="text-decoration-none text-reset">
                             <div class="card folder-card text-center shadow-sm h-100">
                                 <div class="card-body">
                                     <span class="material-icons fs-1 text-success">folder</span>
@@ -75,7 +74,7 @@ require_once '../config/config.php';
             history.go(1);
         };
     </script>
-    <script src="../../script/bootstrap.bundle.min.js"></script>
+    <script src="../script/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
