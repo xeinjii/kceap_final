@@ -76,7 +76,8 @@ $count = 1;
             </div>
 
             <!-- Enhanced Add Account Modal -->
-            <div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountLabel" aria-hidden="true">
+            <div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountLabel"
+                aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <form action="addacc_process.php" method="post" class="modal-content">
                         <div class="modal-header bg-success text-white">
@@ -86,27 +87,43 @@ $count = 1;
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="fullname" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Enter full name" required>
+                                <input type="text" class="form-control" id="fullname" name="fullname"
+                                    placeholder="Enter full name" required>
                             </div>
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="Enter username" required>
                             </div>
                             <div class="mb-3">
                                 <label for="pass" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="pass" name="password" placeholder="Enter password" required>
+                                <input type="password" class="form-control" id="pass" name="password"
+                                    placeholder="Enter password" required minlength="8"
+                                    oninput="checkPasswordStrength(this.value)">
+
+                                <!-- Strength bar -->
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div id="passwordStrengthBar" class="progress-bar" role="progressbar"
+                                        style="width: 0%;"></div>
+                                </div>
+
+                                <!-- Strength text -->
+                                <small id="passwordStrengthText" class="form-text"></small>
                             </div>
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" name="submit" class="btn btn-success">Save Account</button>
+                            <button type="submit" name="submit" id="saveAccountBtn" class="btn btn-success"
+                                disabled>Save Account</button>
                         </div>
                     </form>
                 </div>
             </div>
 
             <!-- Edit Account Modal -->
-            <div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountLabel" aria-hidden="true">
+            <div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountLabel"
+                aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <form id="editForm" method="post" class="modal-content">
                         <div class="modal-header bg-warning text-white">
@@ -124,11 +141,13 @@ $count = 1;
                             </div>
                             <div class="mb-3">
                                 <label for="editNewUsername" class="form-label">New Username</label>
-                                <input type="text" class="form-control" id="editNewUsername" name="new_username" placeholder="Enter new username">
+                                <input type="text" class="form-control" id="editNewUsername" name="new_username"
+                                    placeholder="Enter new username">
                             </div>
                             <div class="mb-3">
                                 <label for="editPassword" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="editPassword" name="password" placeholder="Leave blank to keep current password">
+                                <input type="password" class="form-control" id="editPassword" name="password"
+                                    placeholder="Leave blank to keep current password">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -181,6 +200,60 @@ $count = 1;
             });
         });
     </script>
+
+    <script>
+        function checkPasswordStrength(password) {
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[@$!%*?&]/.test(password)) strength++;
+
+            const bar = document.getElementById("passwordStrengthBar");
+            const text = document.getElementById("passwordStrengthText");
+            const saveBtn = document.getElementById("saveAccountBtn");
+
+            let strengthText = "";
+            let strengthClass = "";
+            let barWidth = 0;
+
+            if (strength <= 1) {
+                barWidth = 20;
+                strengthText = "Very weak";
+                strengthClass = "bg-danger";
+                saveBtn.disabled = true;
+            } else if (strength === 2) {
+                barWidth = 40;
+                strengthText = "Weak";
+                strengthClass = "bg-warning";
+                saveBtn.disabled = true;
+            } else if (strength === 3) {
+                barWidth = 60;
+                strengthText = "Medium";
+                strengthClass = "bg-info";
+                saveBtn.disabled = false;
+            } else if (strength === 4) {
+                barWidth = 80;
+                strengthText = "Strong";
+                strengthClass = "bg-primary";
+                saveBtn.disabled = false;
+            } else if (strength === 5) {
+                barWidth = 100;
+                strengthText = "Very strong";
+                strengthClass = "bg-success";
+                saveBtn.disabled = false;
+            }
+
+            bar.style.width = barWidth + "%";
+            bar.className = "progress-bar " + strengthClass;
+            text.textContent = strengthText;
+            text.className = "form-text text-" + strengthClass.split('-')[1]; // match text color
+        }
+    </script>
+
+
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

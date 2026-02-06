@@ -1,5 +1,7 @@
 <?php
+session_start();
 include 'header.php';
+require_once '../config/config.php';
 ?>
 <body>
     <div class="d-flex">

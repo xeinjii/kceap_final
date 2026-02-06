@@ -1,5 +1,7 @@
 <?php
+session_start();
 include 'header.php';
+require_once '../config/config.php';
 // make sure getMailer() is defined
 ?>
 
