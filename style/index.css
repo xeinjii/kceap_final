@@ -212,3 +212,21 @@ body {
   }
 }
 
+/* Add these styles to your existing index.css file */
+
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+.btn .badge {
+  position: relative;
+  top: -1px;
+  margin-left: 5px;
+}
+
+.alert {
+  border-radius: 0;
+  margin-bottom: 0;
+  text-align: center;
+}

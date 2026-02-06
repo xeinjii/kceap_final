@@ -1,0 +1,12 @@
+{
+    "college": {
+        "deadline": "2026-02-06T03:00",
+        "limit": 5,
+        "disabled": true
+    },
+    "highschool": {
+        "deadline": "2026-02-06T01:11",
+        "limit": 5,
+        "disabled": true
+    }
+}

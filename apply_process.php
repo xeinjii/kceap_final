@@ -1,49 +1,95 @@
 <?php
 session_start();
-include './config/config.php'; // Include your DB connection
+include './config/config.php'; // DB connection
+require_once './config/apply_control.php';
+
+if (!isApplyButtonEnabled()) {
+    $_SESSION['applyfailed'] = "Sorry, applications are currently closed.";
+    header("Location: index.php");
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $firstName = $_POST['firstName'] ?? '';
-    $middleName = $_POST['middleName'] ?? '';
-    $lastName = $_POST['lastName'] ?? '';
-    $school = $_POST['school'] ?? '';
-    $level = $_POST['level'] ?? '';
-    $address = $_POST['address'] ?? '';
-    $phoneNumber = $_POST['phoneNumber'] ?? '';
+    // Collect inputs
+    $firstName    = $_POST['firstName']    ?? '';
+    $middleName   = $_POST['middleName']   ?? '';
+    $lastName     = $_POST['lastName']     ?? '';
+    $school       = $_POST['school']       ?? '';
+    $course       = $_POST['course']       ?? '';   // for college
+    $strand       = $_POST['strand']       ?? '';   // for SHS
+    $level        = $_POST['level']        ?? '';
+    $yearLevel    = $_POST['yearLevel']    ?? '';
+    $address      = $_POST['address']      ?? '';
+    $phoneNumber  = $_POST['phoneNumber']  ?? '';
     $emailAddress = $_POST['emailAddress'] ?? '';
 
-    // Sanitize and validate input (basic example)
-    $firstName = htmlspecialchars(trim($firstName));
-    $middleName = htmlspecialchars(trim($middleName));
-    $lastName = htmlspecialchars(trim($lastName));
-    $school = htmlspecialchars(trim($school));
-    $level = htmlspecialchars(trim($level));
-    $address = htmlspecialchars(trim($address));
-    $phoneNumber = htmlspecialchars(trim($phoneNumber));
-    $emailAddress = filter_var($emailAddress, FILTER_VALIDATE_EMAIL);
+    // Decide which to use
+    $course_strand = !empty($course) ? $course : $strand;
 
-    if ($firstName && $lastName && $school && $level && $address && $phoneNumber && $emailAddress) {
-        // Prepare SQL insert
-        $stmt = $conn->prepare("INSERT INTO applicants (firstname, middlename, lastname, school, lvl, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssss", $firstName, $middleName, $lastName, $school, $level, $address, $phoneNumber, $emailAddress);
+    // Sanitize
+    $firstName    = htmlspecialchars(trim($firstName));
+    $middleName   = htmlspecialchars(trim($middleName));
+    $lastName     = htmlspecialchars(trim($lastName));
+    $school       = htmlspecialchars(trim($school));
+    $course_strand= htmlspecialchars(trim($course_strand));
+    $level        = htmlspecialchars(trim($level));
+    $yearLevel    = htmlspecialchars(trim($yearLevel));
+    $address      = htmlspecialchars(trim($address));
+    $phoneNumber  = htmlspecialchars(trim($phoneNumber));
+    $emailAddress = filter_var(trim($emailAddress), FILTER_VALIDATE_EMAIL);
+
+    if ($firstName && $lastName && $school && $course_strand && $level && $yearLevel && $address && $phoneNumber && $emailAddress) {
+
+        // ✅ Check for duplicate email
+        $check = $conn->prepare("SELECT id FROM record WHERE email = ?");
+        $check->bind_param("s", $emailAddress);
+        $check->execute();
+        $check->store_result();
+
+        if ($check->num_rows > 0) {
+            $_SESSION['applyfailed'] = "This email ($emailAddress) is already registered. Please use another email or log in.";
+            header("Location: index.php");
+            exit();
+        }
+        $check->close();
+
+        // Insert into applicants
+        $stmt = $conn->prepare("
+            INSERT INTO applicants 
+            (firstname, middlename, lastname, school, course_strand, lvl, yearLevel, address, phone, email) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->bind_param(
+            "ssssssssss",
+            $firstName,
+            $middleName,
+            $lastName,
+            $school,
+            $course_strand,
+            $level,
+            $yearLevel,
+            $address,
+            $phoneNumber,
+            $emailAddress
+        );
 
         if ($stmt->execute()) {
-           $_SESSION['success'] = "Application submitted successfully!";
-            header("Location: index.php"); // Redirect to a success page
-            exit();
+            $_SESSION['applysuccess'] = "Application submitted successfully!";
         } else {
-            echo "Error: " . $stmt->error;
+            $_SESSION['applyfailed'] = "Something went wrong: " . $stmt->error;
         }
         $stmt->close();
+
+        header("Location: index.php");
+        exit();
+
     } else {
-         $_SESSION['failed'] = "Application submission failed. Please fill in all fields correctly.";
-            header("Location: index.php"); // Redirect to a success page
-            exit();
+        $_SESSION['applyfailed'] = "Application submission failed. Please fill in all fields correctly.";
+        header("Location: index.php");
+        exit();
     }
 
-    $conn->close();
 } else {
     echo "Invalid request.";
 }
-?>

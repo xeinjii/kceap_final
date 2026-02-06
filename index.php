@@ -1,7 +1,45 @@
 <?php
 session_start();
-include './config/config.php'; // Include your DB connection
+require_once __DIR__ . '/config/config.php';
+include 'check_deadline.php';
+
+// Check limits for notes
+$collegeLimitReached = false;
+$hsLimitReached = false;
+if (file_exists(__DIR__ . '/kceap_admin/deadline.json')) {
+    $settings = json_decode(file_get_contents(__DIR__ . '/kceap_admin/deadline.json'), true);
+    $collegeLimit = $settings['college']['limit'] ?? 0;
+    $hsLimit = $settings['highschool']['limit'] ?? 0;
+    if ($collegeLimit > 0) {
+        $collegeCount = $conn->query("SELECT COUNT(*) AS total FROM college_schedule")->fetch_assoc()['total'];
+        if ($collegeCount >= $collegeLimit) {
+            $collegeLimitReached = true;
+        }
+    }
+    if ($hsLimit > 0) {
+        $hsCount = $conn->query("SELECT COUNT(*) AS total FROM highschool_schedule")->fetch_assoc()['total'];
+        if ($hsCount >= $hsLimit) {
+            $hsLimitReached = true;
+        }
+    }
+}
+
+// Check if deadlines are reached
+$collegeActive = !$settings['college']['disabled'];
+$hsActive = !$settings['highschool']['disabled'];
+
+$collegeDeadlineNote = '';
+$hsDeadlineNote = '';
+
+if (!$collegeActive && !empty($settings['college']['deadline'])) {
+    $collegeDeadlineNote = ' (Deadline passed on ' . date('F j, Y, g:i A', strtotime($settings['college']['deadline'])) . ')';
+}
+
+if (!$hsActive && !empty($settings['highschool']['deadline'])) {
+    $hsDeadlineNote = ' (Deadline passed on ' . date('F j, Y, g:i A', strtotime($settings['highschool']['deadline'])) . ')';
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -34,6 +72,71 @@ include './config/config.php'; // Include your DB connection
 
 <body>
 
+   
+
+
+   <?php if (isset($_SESSION['applysuccess'])): ?>
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Application Submitted</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <span class="material-symbols-outlined fs-1 text-success mb-2">check_circle</span>
+                    <?= $_SESSION['applysuccess'] ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        });
+    </script>
+    <?php unset($_SESSION['applysuccess']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['applyfailed'])): ?>
+    <div class="modal fade" id="failedModal" tabindex="-1" aria-labelledby="failedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="failedModalLabel">Application Failed</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <span class="material-symbols-outlined fs-1 text-danger mb-2">error</span>
+                    <?= $_SESSION['applyfailed'] ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var failedModal = new bootstrap.Modal(document.getElementById('failedModal'));
+            failedModal.show();
+        });
+    </script>
+    <?php unset($_SESSION['applyfailed']); ?>
+<?php endif; ?>
+
+<?php if ($collegeLimitReached): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Notice:</strong> College applications have reached the limit.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($hsLimitReached): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Notice:</strong> High School applications have reached the limit.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
@@ -48,16 +151,11 @@ include './config/config.php'; // Include your DB connection
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#scholarships">Scholarships</a></li>
                     <li class="nav-item"><a class="nav-link" href="#features">Key features</a></li>
                     <li class="nav-item"><a class="nav-link" href="#eligibility">Eligibility</a></li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-outline-light" href="#apply-now" data-bs-toggle="modal"
-                            data-bs-target="#applyModal">
-                            <span class="material-symbols-outlined align-middle me-1">edit_square</span>
-                            Apply Now
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link <?php if (!$collegeActive || $collegeLimitReached) echo 'disabled'; ?>" href="<?php echo ($collegeActive && !$collegeLimitReached) ? 'collegeapply.php' : '#'; ?>" <?php if (!$collegeActive || $collegeLimitReached) echo 'aria-disabled="true"'; ?>><?php echo $collegeLimitReached ? 'College (Limit Reached)' : 'College' . $collegeDeadlineNote; ?></a></li>
+                    <li class="nav-item"><a class="nav-link <?php if (!$hsActive || $hsLimitReached) echo 'disabled'; ?>" href="<?php echo ($hsActive && !$hsLimitReached) ? 'highschoolapply.php' : '#'; ?>" <?php if (!$hsActive || $hsLimitReached) echo 'aria-disabled="true"'; ?>><?php echo $hsLimitReached ? 'Highschool (Limit Reached)' : 'Highschool' . $hsDeadlineNote; ?></a></li>
+                    <li class="nav-item"><a class="nav-link" href="announcement.php">Announcement</a></li>
                 </ul>
             </div>
         </div>
@@ -73,83 +171,17 @@ include './config/config.php'; // Include your DB connection
                         dreams</p>
                     <div class="d-flex gap-3 mt-4">
                         <!-- Button triggers modal -->
-                        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal"
-                            data-bs-target="#applyModal">
-                            <span class="material-symbols-outlined align-middle me-1">school</span>
-                            Apply Now
-                        </button>
                     </div>
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
                     <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                        alt="Students celebrating graduation" class="img-fluid rounded-4 shadow">
+                        alt="Students celebrating graduation" class="img-fluid rounded-4 shadow" width="100%">
                 </div>
             </div>
         </div>
     </section>
 
-<!-- Apply Modal -->
-<div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="applyForm" action="apply_process.php" method="POST">
-        <div class="modal-header sticky-top bg-white">
-          <h5 class="modal-title" id="applyModalLabel">Scholarship Application Form</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="container-fluid px-2">
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label for="firstName" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="firstName" name="firstName" required>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="middleName" class="form-label">Middle Name</label>
-                <input type="text" class="form-control" id="middleName" name="middleName">
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="lastName" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="lastName" name="lastName" required>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="school" class="form-label">School</label>
-                <input type="text" class="form-control" id="school" name="school" required>
-              </div>
-               <div class="col-12 col-md-6">
-                <label for="level" class="form-label">School level</label>
-                <select class="form-select" name="level" id="level" required>  
-                    <option value="" selected disabled>Select level</option>
-                    <option value="shs">Senior High School level</option>
-                    <option value="college">College level</option>
-                </select>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" name="address" rows="2" required></textarea>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="phoneNumber" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required pattern="[0-9]{11}" maxlength="11">
-                <div class="form-text">Enter digits only, 11 characters</div>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="emailAddress" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="emailAddress" name="emailAddress" required>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer sticky-bottom bg-white">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Submit Application</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
+    
 
     <!-- Key Features Section -->
     <section class="py-5 bg-light" id="features">
@@ -416,13 +448,7 @@ include './config/config.php'; // Include your DB connection
                     <h2 class="mb-3">Ready to Transform Your Future?</h2>
                     <p class="lead mb-4">Join thousands of students who have achieved their academic dreams with KCEAP
                         scholarships.</p>
-                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                        <a href="#" class="btn btn-light btn-lg px-4" data-bs-toggle="modal"
-                            data-bs-target="#applyModal">
-                            <span class="material-symbols-outlined align-middle me-2">edit_square</span>
-                            Apply Now
-                        </a>
-                    </div>
+                   
                 </div>
             </div>
         </div>
@@ -477,20 +503,6 @@ include './config/config.php'; // Include your DB connection
                         </li>
                     </ul>
                 </div>
-                <!-- optional -->
-                <div class="col-lg-3 col-md-4">
-                    <h5 class="mb-3">Newsletter</h5>
-                    <p class="text-white-50">Subscribe to receive updates on new scholarship opportunities.</p>
-                    <form class="mb-3">
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Your email">
-                            <button class="btn btn-primary" type="submit">
-                                <span class="material-symbols-outlined">send</span>
-                            </button>
-                        </div>
-                    </form>
-                    <small class="text-white-50">We respect your privacy.</small>
-                </div>
 
             </div>
 
@@ -507,6 +519,9 @@ include './config/config.php'; // Include your DB connection
             </div>
         </div>
     </footer>
+
+
+  
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

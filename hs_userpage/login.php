@@ -1,10 +1,18 @@
 <?php
-include '../kceap_admin/header.php';
-include '../config/config.php';
+require_once '../config/config.php';
 session_start();
-?>
 
- <style>
+?>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Highschool Login - KCEAP</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="stylesheet" href="../style/bootstrap.min.css">
+
+    <style>
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
@@ -17,24 +25,22 @@ session_start();
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
             margin: auto;
+            text-align: center;
         }
         .login-form img {
             width: 80px;
             height: auto;
             display: block;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 1rem;
         }
         .login-form h2 {
             color: #333;
             text-align: center;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-        .form-floating {
             margin-bottom: 1rem;
+            font-weight: 600;
         }
         .password-toggle {
             cursor: pointer;
@@ -42,53 +48,61 @@ session_start();
             font-size: 0.875rem;
             color: #6c757d;
         }
+        .msg {
+            margin-bottom: 1rem;
+        }
     </style>
-
+</head>
 <body>
-    
+
 <div class="container">
     <div class="login-form">
         <img src="../img/logo.png" alt="KCEAP Logo">
-        <h2>ADMIN LOGIN</h2>
-        <form action="login_process.php" method="POST">
+        <h2>Highschool Account Login</h2>
+
+        <?php if (!empty($_SESSION['message'])): ?>
+            <div class="msg alert <?php echo ($_SESSION['message_type'] ?? '') === 'success' ? 'alert-success' : 'alert-danger'; ?>">
+                <?php 
+                    echo htmlspecialchars($_SESSION['message']); 
+                    unset($_SESSION['message'], $_SESSION['message_type']); 
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="login_process.php" method="post" autocomplete="off" novalidate>
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                <label for="username">Username</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                <label for="email">Email address</label>
             </div>
             <div class="form-floating mb-3">
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                 <label for="password">Password</label>
             </div>
-            <div class="mb-3">
+
+            <div class="mb-3 text-start">
                 <div class="form-check password-toggle">
                     <input type="checkbox" class="form-check-input" id="showPassword">
                     <label class="form-check-label" for="showPassword">Show Password</label>
                 </div>
             </div>
+
             <button type="submit" class="btn btn-primary w-100 py-2">
-                <span class="material-symbols-outlined align-middle me-2">login</span>
                 Login
             </button>
         </form>
-    </div>
-</div>
 
-
-<!-- Password Toggle Script -->
-<script>
-    document.getElementById('showPassword').addEventListener('change', function() {
-        const password = document.getElementById('password');
-        password.type = this.checked ? 'text' : 'password';
-    });
-</script>
- <script>
-        history.pushState(null, null, location.href);
-        window.onpopstate = function () {
-            history.go(1);
-        };
-    </script>
+        <hr class="my-3">
 
 <script src="../script/bootstrap.bundle.min.js"></script>
+<script>
+    const showPassword = document.getElementById('showPassword');
+    if (showPassword) {
+        showPassword.addEventListener('change', function() {
+            const password = document.getElementById('password');
+            if (password) password.type = this.checked ? 'text' : 'password';
+        });
+    }
+</script>
 
 </body>
 </html>
