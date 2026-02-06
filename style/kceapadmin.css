@@ -1,0 +1,118 @@
+ body {
+     font-family: 'Poppins', sans-serif;
+     background: #f8f9fa;
+ }
+
+.sidebar {
+    position: fixed;        /* keeps sidebar fixed */
+    top: 0;
+    left: 0;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
+    height: 100vh;          /* full height */
+    background: #0d6efd;
+    color: #fff;
+    overflow-y: auto;       /* scroll sidebar only if needed */
+    transition: all 0.3s;
+    z-index: 1000;          /* stays above content */
+}
+
+ .sidebar.collapsed {
+     min-width: 70px;
+     max-width: 70px;
+ }
+
+ .sidebar .nav-link {
+     color: #fff;
+     font-weight: 500;
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     padding: 12px 20px;
+     border-radius: 0.5rem;
+     margin-bottom: 4px;
+     transition: background 0.2s;
+ }
+
+ .sidebar .nav-link.active,
+ .sidebar .nav-link:hover {
+     background: #0dcaf0;
+     color: #212529;
+ }
+
+ .sidebar .material-symbols-outlined {
+     font-size: 1.7rem;
+     min-width: 32px;
+     text-align: center;
+ }
+
+ .sidebar .sidebar-title {
+     font-size: 1.2rem;
+     font-weight: 600;
+     padding: 24px 20px 12px 20px;
+     letter-spacing: 1px;
+ }
+
+ .sidebar.collapsed .sidebar-title,
+ .sidebar.collapsed .nav-link span:not(.material-symbols-outlined) {
+     display: none;
+ }
+
+ .sidebar.collapsed .material-symbols-outlined {
+     margin: 0 auto;
+ }
+
+ .main-content {
+     transition: margin-left 0.3s;
+     padding-inline-start: 20px;
+     /* create a small gap between sidebar and content */
+     margin-left: 280px;
+     width: calc(100% - 280px);
+     height: 100vh;
+     overflow-y: auto;
+ }
+
+ .sidebar.collapsed~.main-content {
+     margin-left: 90px;
+     width: calc(100% - 90px);
+ }
+
+ .navbar {
+     background: #fff;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+     /* fix navbar to top and avoid covering sidebar */
+     position: fixed;
+     top: 0;
+     left: 280px;
+     right: 0;
+     z-index: 1020;
+     width: calc(100% - 280px);
+ }
+
+/* ensure page content starts below navbar */
+.main-content .container {
+    margin-top: 64px;
+}
+
+ .navbar .navbar-brand {
+     font-weight: 600;
+     color: #0d6efd;
+     letter-spacing: 1px;
+ }
+
+ .navbar .material-symbols-outlined {
+     font-size: 2rem;
+     color: #0d6efd;
+ }
+
+ .folder-card {
+     transition: transform 0.2s ease;
+     cursor: pointer;
+     border-radius: 1rem;
+ }
+
+ .folder-card:hover {
+     transform: translateY(-5px);
+     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+ }

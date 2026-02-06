@@ -1,0 +1,43 @@
+[
+    {
+        "title": "hello",
+        "message": "hiiiiiiii",
+        "audience": [
+            "college",
+            "highschool"
+        ],
+        "attachment": null,
+        "created_at": "2026-01-01 16:58:31",
+        "sent_at": null
+    },
+    {
+        "title": "ohlol",
+        "message": "hahaha",
+        "audience": [],
+        "attachment": null,
+        "created_at": "2026-01-07 05:33:15",
+        "sent": 0,
+        "sent_at": null
+    },
+    {
+        "title": "gago",
+        "message": "kaaaaaaaaaaaaaaaaaaaaaaa",
+        "audience": [],
+        "attachment": null,
+        "created_at": "2026-02-01 12:50:39",
+        "sent": 0,
+        "sent_at": null
+    },
+    {
+        "title": "dfdf",
+        "message": "announcment",
+        "audience": [
+            "college",
+            "highschool"
+        ],
+        "attachment": null,
+        "created_at": "2026-02-04 06:45:37",
+        "sent": 1,
+        "sent_at": "2026-02-04 06:45:37"
+    }
+]
