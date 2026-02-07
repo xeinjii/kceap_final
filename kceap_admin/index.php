@@ -2,6 +2,12 @@
 include '../kceap_admin/header.php';
 include '../config/config.php';
 session_start();
+
+// 🚫 If already logged in, NEVER show login page
+if (isset($_SESSION['admin_id'])) {
+    header("Location: dashboard.php");
+    exit;
+}
 ?>
 
  <style>

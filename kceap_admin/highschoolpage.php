@@ -1,5 +1,7 @@
 <?php
+session_start();
 include 'header.php';
+require_once '../config/config.php';
 ?>
 <body>
     <div class="d-flex">
@@ -25,8 +27,7 @@ include 'header.php';
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="../kceap_admin/HIGHSCHOOL/set_schedule.php" class="text-decoration-none text-reset"
-                            data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                        <a href="../kceap_admin/HIGHSCHOOL/set_schedule.php" class="text-decoration-none text-reset">
                             <div class="card folder-card text-center shadow-sm h-100">
                                 <div class="card-body">
                                     <span class="material-icons fs-1 text-success">folder</span>
@@ -63,6 +64,6 @@ include 'header.php';
             </div>
         </div>
     </div>
-    <script src="../../script/bootstrap.bundle.min.js"></script>
+    <script src="../script/bootstrap.bundle.min.js"></script>
 </body>
 </html>

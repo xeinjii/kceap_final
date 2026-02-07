@@ -18,19 +18,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Verify password
         if (password_verify($password, $user['password'])) {
+
+            // 🔐 Prevent session fixation
+            session_regenerate_id(true);
+
             // Set session
             $_SESSION['admin_id'] = $user['id'];
             $_SESSION['admin_username'] = $user['username'];
             $_SESSION['admin_name'] = $user['fullname'];
 
-            // Redirect to dashboard
+            // ✅ Redirect (login page removed from history)
             header("Location: dashboard.php");
             exit;
         } else {
-            echo "<script>alert('Incorrect password.'); window.history.back();</script>";
+            echo "<script>alert('Incorrect password.'); window.location='login.php';</script>";
+            exit;
         }
     } else {
-        echo "<script>alert('Username not found.'); window.history.back();</script>";
+        echo "<script>alert('Username not found.'); window.location='login.php';</script>";
+        exit;
     }
 }
 ?>

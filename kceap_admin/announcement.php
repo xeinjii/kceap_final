@@ -1,6 +1,11 @@
 <?php
 session_start();
 include 'header.php';
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: index.php");
+    exit();
+}
 ?>
 <body>
     <div class="d-flex">

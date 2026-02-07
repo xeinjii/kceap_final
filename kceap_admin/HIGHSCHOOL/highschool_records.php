@@ -2,12 +2,18 @@
 require_once '../../config/config.php';
 session_start();
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
 // Fetch all high school records
 $sql = "SELECT * FROM highschool_account ORDER BY id DESC";
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,18 +23,61 @@ $result = $conn->query($sql);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
-        .brand-text { font-weight: 600; font-size: 1.2rem; }
-        .table th, .table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; max-width: 200px; font-size: 0.85rem; }
-        .table td:nth-child(8), .table td:nth-child(10) { max-width: 200px; }
-        .table thead { background-color: #0d6efd; color: white; }
-        .card { border: none; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); }
-        .navbar { background-color: #0d6efd; }
-        .navbar .nav-link, .navbar .navbar-brand { color: white; }
-        .navbar .nav-link:hover { color: #ffc107; }
-        footer { background-color: #212529; }         
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .brand-text {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .table th,
+        .table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            max-width: 200px;
+            font-size: 0.85rem;
+        }
+
+        .table td:nth-child(8),
+        .table td:nth-child(10) {
+            max-width: 200px;
+        }
+
+        .table thead {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar {
+            background-color: #0d6efd;
+        }
+
+        .navbar .nav-link,
+        .navbar .navbar-brand {
+            color: white;
+        }
+
+        .navbar .nav-link:hover {
+            color: #ffc107;
+        }
+
+        footer {
+            background-color: #212529;
+        }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg py-3">
         <div class="container d-flex justify-content-between align-items-center">
@@ -36,7 +85,7 @@ $result = $conn->query($sql);
                 <img src="../../img/logo.png" alt="KCEAP Logo" width="40" class="me-2">
                 <span class="brand-text">KCEAP Scholarships</span>
             </div>
-            
+
             <a href="../../kceap_admin/highschoolpage.php" class="btn btn-outline-light btn-sm">Back to Mainpage</a>
         </div>
     </nav>
@@ -52,15 +101,19 @@ $result = $conn->query($sql);
             <div class="card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                         <h3 class="mb-0">
-                        <span class="material-symbols-outlined align-middle me-1 text-primary">school</span>
-                        High School Scholars Records
-                    </h3>
-                     <small class="text-muted">School Year: <?php echo date('Y') . ' - ' . (date('Y') + 1); ?></small>
+                        <h3 class="mb-0">
+                            <span class="material-symbols-outlined align-middle me-1 text-primary">school</span>
+                            High School Scholars Records
+                        </h3>
+                        <small class="text-muted">School Year:
+                            <?php echo date('Y') . ' - ' . (date('Y') + 1); ?></small>
                     </div>
-                      <form method="POST" action="reset_statuses.php" onsubmit="return confirm('Reset all applicant statuses to pending? This cannot be undone.');" style="margin:0">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Reset All to Pending</button>
-                    </form>
+                    <!-- Trigger Reset Modal -->
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#resetModal">
+                        Reset All to Pending
+                    </button>
+
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped align-middle">
@@ -87,27 +140,35 @@ $result = $conn->query($sql);
                                     <tr>
                                         <td><?= $i++ ?></td>
                                         <td title="<?= htmlspecialchars($row['first_name']) ?>">
-                                            <?= htmlspecialchars($row['first_name']) ?></td>
+                                            <?= htmlspecialchars($row['first_name']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['middle_name']) ?>">
-                                            <?= htmlspecialchars($row['middle_name']) ?></td>
+                                            <?= htmlspecialchars($row['middle_name']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['last_name']) ?>">
-                                            <?= htmlspecialchars($row['last_name']) ?></td>
+                                            <?= htmlspecialchars($row['last_name']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['school']) ?>">
-                                            <?= htmlspecialchars($row['school']) ?></td>
+                                            <?= htmlspecialchars($row['school']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['year_level']) ?>">
-                                            <?= htmlspecialchars($row['year_level']) ?></td>
+                                            <?= htmlspecialchars($row['year_level']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['semester'] ?? 'N/A') ?>">
-                                            <?= htmlspecialchars($row['semester'] ?? 'N/A') ?></td>
+                                            <?= htmlspecialchars($row['semester'] ?? 'N/A') ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['address']) ?>">
-                                            <?= htmlspecialchars($row['address']) ?></td>
+                                            <?= htmlspecialchars($row['address']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['phone_number']) ?>">
-                                            <?= htmlspecialchars($row['phone_number']) ?></td>
+                                            <?= htmlspecialchars($row['phone_number']) ?>
+                                        </td>
                                         <td title="<?= htmlspecialchars($row['email']) ?>">
-                                            <?= htmlspecialchars($row['email']) ?></td>
+                                            <?= htmlspecialchars($row['email']) ?>
+                                        </td>
                                         <td><?= htmlspecialchars($row['status']) ?></td>
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-warning me-1 edit-btn"
-                                                title="Edit"
+                                            <button class="btn btn-sm btn-warning me-1 edit-btn" title="Edit"
                                                 data-id="<?= $row['id'] ?>"
                                                 data-first="<?= htmlspecialchars($row['first_name']) ?>"
                                                 data-middle="<?= htmlspecialchars($row['middle_name']) ?>"
@@ -146,65 +207,88 @@ $result = $conn->query($sql);
     </section>
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <form id="editForm" method="POST" action="action_process.php">
-          <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-              <h5 class="modal-title" id="editModalLabel">Edit Scholar Record</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body row g-3">
-              <input type="hidden" name="action" value="edit">
-              <input type="hidden" name="id" id="edit-id">
-              <div class="col-md-4">
-                <label class="form-label">First Name</label>
-                <input type="text" class="form-control" name="first_name" id="edit-first">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Middle Name</label>
-                <input type="text" class="form-control" name="middle_name" id="edit-middle">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Last Name</label>
-                <input type="text" class="form-control" name="last_name" id="edit-last">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">School</label>
-                <input type="text" class="form-control" name="school" id="edit-school">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Year Level</label>
-                <input type="text" class="form-control" name="year_level" id="edit-year">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Semester</label>
-                <input type="text" class="form-control" name="semester" id="edit-semester">
-              </div>
-              <div class="col-md-8">
-                <label class="form-label">Address</label>
-                <input type="text" class="form-control" name="address" id="edit-address">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Phone Number</label>
-                <input type="text" class="form-control" name="phone_number" id="edit-phone">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Email Address</label>
-                <input type="email" class="form-control" name="email_address" id="edit-email">
-              </div>
-              <div class="col-md-12">
-                <label class="form-label">Status</label>
-                <input type="text" class="form-control" name="status" id="edit-status">
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-success">Save Changes</button>
-            </div>
-          </div>
-        </form>
-      </div>
+        <div class="modal-dialog modal-lg">
+            <form id="editForm" method="POST" action="action_process.php">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="editModalLabel">Edit Scholar Record</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body row g-3">
+                        <input type="hidden" name="action" value="edit">
+                        <input type="hidden" name="id" id="edit-id">
+                        <div class="col-md-4">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" id="edit-first">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Middle Name</label>
+                            <input type="text" class="form-control" name="middle_name" id="edit-middle">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" id="edit-last">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">School</label>
+                            <input type="text" class="form-control" name="school" id="edit-school">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Year Level</label>
+                            <input type="text" class="form-control" name="year_level" id="edit-year">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Semester</label>
+                            <input type="text" class="form-control" name="semester" id="edit-semester">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" name="address" id="edit-address">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" name="phone_number" id="edit-phone">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" name="email_address" id="edit-email">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Status</label>
+                            <input type="text" class="form-control" name="status" id="edit-status">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form method="POST" action="reset_statuses.php" class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="resetModalLabel">Confirm Reset</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reset <strong>all applicant statuses</strong> to
+                        <strong>pending</strong>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Reset All</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -228,4 +312,5 @@ $result = $conn->query($sql);
         });
     </script>
 </body>
+
 </html>

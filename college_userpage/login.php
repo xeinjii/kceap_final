@@ -2,6 +2,12 @@
 require_once '../config/config.php';
 session_start();
 
+// 🚫 If already logged in, NEVER show login page
+if (isset($_SESSION['user_id'])) {
+    header("Location: mainpage.php");
+    exit;
+}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -9,7 +15,7 @@ session_start();
     <meta charset="utf-8">
     <title>College Login - KCEAP</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-
+    <link rel="icon" href="../img/logo.png" type="image/png">
     <link rel="stylesheet" href="../style/bootstrap.min.css">
 
     <style>
@@ -102,6 +108,14 @@ session_start();
             if (password) password.type = this.checked ? 'text' : 'password';
         });
     }
+</script>
+
+<script>
+  history.pushState(null, null, location.href);
+
+  window.addEventListener("popstate", function () {
+    history.pushState(null, null, location.href);
+  });
 </script>
 
 </body>
