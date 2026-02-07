@@ -3,6 +3,11 @@ session_start();
 include 'header.php';
 require_once '../config/config.php';
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
 // Read current deadline settings
 $deadlineFile = __DIR__ . '/deadline.json';
 $currentSettings = [

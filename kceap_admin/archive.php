@@ -3,6 +3,11 @@ session_start();
 include 'header.php';
 require_once '../config/config.php';
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
 // Get unique school years from both tables
 $years_sql = "
     SELECT DISTINCT school_year FROM hs_reports 

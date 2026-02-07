@@ -13,6 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($row = $result->fetch_assoc()) {
         if (password_verify($password, $row['password'])) {
+
+         // 🔐 Prevent session fixation
+            session_regenerate_id(true);
+            
             $_SESSION['id'] = $row['id'];
             $_SESSION['user_id'] = $row['applicant_id'];
             $_SESSION['first_name'] = $row['first_name'];

@@ -2,6 +2,11 @@
 require_once '../../config/config.php';
 session_start();
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
 // Fetch all college accounts
 $sql = "SELECT * FROM college_account ORDER BY applicant_id ASC";
 $result = $conn->query($sql);

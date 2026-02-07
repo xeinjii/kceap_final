@@ -2,6 +2,11 @@
 require_once '../../config/config.php';
 session_start();
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
 // Fetch all high school records
 $sql = "SELECT * FROM highschool_account ORDER BY id DESC";
 $result = $conn->query($sql);

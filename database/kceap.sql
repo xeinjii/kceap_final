@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 15, 2026 at 02:32 PM
+-- Generation Time: Feb 06, 2026 at 12:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -58,14 +58,6 @@ CREATE TABLE `announcement` (
   `sent` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `announcement`
---
-
-INSERT INTO `announcement` (`id`, `title`, `message`, `attachment`, `created_at`, `sent`) VALUES
-(1, 'hello', 'hiiiiiiii', NULL, '2026-01-01 16:58:31', 1),
-(2, 'ohlol', 'hahaha', NULL, '2026-01-07 05:33:15', 0);
-
 -- --------------------------------------------------------
 
 --
@@ -91,13 +83,6 @@ CREATE TABLE `college_account` (
   `schedule_time` time DEFAULT NULL,
   `status` varchar(155) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `college_account`
---
-
-INSERT INTO `college_account` (`id`, `applicant_id`, `first_name`, `middle_name`, `last_name`, `school`, `course`, `year_level`, `address`, `phone_number`, `email`, `password`, `semester`, `created_at`, `schedule_date`, `schedule_time`, `status`) VALUES
-(27, 31, 'Matt Andrei', 'G', 'Belano', 'CPSU-KABANKALAN', 'BSIT', '4th Year', 'CAROL-AN', '09444444444', 'belanomattandrei@gmail.com', '$2y$10$I3DiAPcksOYy0guNC4.gGerWYl1tH38QFncTVrk.bqn8/DytKP7AS', '1st semester', '2026-01-08 12:45:43', NULL, NULL, 'incomplete');
 
 -- --------------------------------------------------------
 
@@ -150,13 +135,6 @@ CREATE TABLE `college_reports` (
   `school_year` varchar(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `college_reports`
---
-
-INSERT INTO `college_reports` (`id`, `applicant_id`, `first_name`, `middle_name`, `last_name`, `school`, `course`, `year_level`, `semester`, `address`, `phone_number`, `email`, `status`, `school_year`, `created_at`) VALUES
-(1, 21, 'Mark Adrian', 'G', 'Belano', 'CHMSU-BINALBAGAN', 'BSIT', '4th Year', '2nd semester', 'CAROL-AN', '09833333333', 'belanomarkadrian@gmail.com', 'graduated', '2026-2027', '2026-01-03 11:43:19');
 
 -- --------------------------------------------------------
 
@@ -227,13 +205,6 @@ CREATE TABLE `highschool_account` (
   `semester` varchar(50) DEFAULT '1st semester'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `highschool_account`
---
-
-INSERT INTO `highschool_account` (`id`, `applicant_id`, `first_name`, `middle_name`, `last_name`, `school`, `strand`, `year_level`, `address`, `phone_number`, `email`, `created_at`, `schedule_date`, `schedule_time`, `status`, `password`, `semester`) VALUES
-(25, 23, 'Jezrel', 'B', 'Acebron', 'FBC-HS', 'GAS', 'Grade 12', 'CAROL-AN', '09444444444', 'acebronjezrel@gmail.com', '2026-01-08 13:04:49', NULL, NULL, 'incomplete', '$2y$10$cUmvlGu5gvO79OLVtn/aMeqg6ma/l.eUvEgMteOjDggvfrTl/wZma', '1st semester');
-
 -- --------------------------------------------------------
 
 --
@@ -282,6 +253,14 @@ CREATE TABLE `highschool_schedule` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `highschool_schedule`
+--
+
+INSERT INTO `highschool_schedule` (`id`, `firstName`, `middleName`, `lastName`, `school`, `strand`, `yearLevel`, `address`, `phoneNumber`, `emailAddress`, `created_at`) VALUES
+(28, 'MATTAAA', 'ANDREIAAA', 'BELANOAAA', 'KCC-HS', 'STEM', 'Grade 12', 'LINAO', '09833333333', 'lottiesguanzon@gmail.com', '2026-01-25 14:25:07'),
+(29, 'MATT', 'ANDREI', 'BELANO', 'FBC-HS', 'HUMSS', 'Grade 12', 'DAAN BANUA', '09833333333', 'belanomattandrei@gmail.com', '2026-01-29 14:29:20');
+
 -- --------------------------------------------------------
 
 --
@@ -328,13 +307,6 @@ CREATE TABLE `hs_reports` (
   `school_year` varchar(50) DEFAULT NULL,
   `archived_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `hs_reports`
---
-
-INSERT INTO `hs_reports` (`id`, `applicant_id`, `first_name`, `middle_name`, `last_name`, `school`, `strand`, `year_level`, `semester`, `address`, `phone_number`, `email`, `status`, `school_year`, `archived_at`) VALUES
-(2, 22, 'Matt andrei', 'G', 'Belano', 'FORTRESS', 'HUMSS', 'Grade 12', '2nd semester', 'CAMUGAO', '09833333333', 'lottiesguanzon@gmail.com', 'graduated', '2026-2027', '2026-01-03 09:11:32');
 
 --
 -- Indexes for dumped tables
@@ -435,7 +407,7 @@ ALTER TABLE `hs_reports`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `announcement`
@@ -447,13 +419,13 @@ ALTER TABLE `announcement`
 -- AUTO_INCREMENT for table `college_account`
 --
 ALTER TABLE `college_account`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `college_documents`
 --
 ALTER TABLE `college_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `college_renew_documents`
@@ -465,25 +437,25 @@ ALTER TABLE `college_renew_documents`
 -- AUTO_INCREMENT for table `college_reports`
 --
 ALTER TABLE `college_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `college_schedule`
 --
 ALTER TABLE `college_schedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `college_schedule_list`
 --
 ALTER TABLE `college_schedule_list`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `highschool_account`
 --
 ALTER TABLE `highschool_account`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `highschool_documents`
@@ -501,13 +473,13 @@ ALTER TABLE `highschool_renew_documents`
 -- AUTO_INCREMENT for table `highschool_schedule`
 --
 ALTER TABLE `highschool_schedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `highschool_schedule_list`
 --
 ALTER TABLE `highschool_schedule_list`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `hs_reports`

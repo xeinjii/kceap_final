@@ -2,6 +2,11 @@
 require_once '../../config/config.php';
 session_start();
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
 // Fetch all scheduled applicants from college_schedule_list
 $sql = "SELECT * FROM college_schedule_list ORDER BY schedule_date DESC, schedule_time DESC";
 $result = $conn->query($sql);

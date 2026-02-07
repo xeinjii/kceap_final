@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['confirm'])) {
 }
 
 // Determine where to redirect after logout (decision making)
-$redirect = '../index.php'; // default site landing
+$redirect = 'index.php'; // default site landing
 if (isset($_SESSION['admin_id'])) {
     $redirect = 'index.php'; // admin login page in this folder
 } 

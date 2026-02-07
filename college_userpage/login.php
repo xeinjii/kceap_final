@@ -2,6 +2,12 @@
 require_once '../config/config.php';
 session_start();
 
+// 🚫 If already logged in, NEVER show login page
+if (isset($_SESSION['user_id'])) {
+    header("Location: mainpage.php");
+    exit;
+}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -102,6 +108,14 @@ session_start();
             if (password) password.type = this.checked ? 'text' : 'password';
         });
     }
+</script>
+
+<script>
+  history.pushState(null, null, location.href);
+
+  window.addEventListener("popstate", function () {
+    history.pushState(null, null, location.href);
+  });
 </script>
 
 </body>
