@@ -51,13 +51,16 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
     <link rel="icon" href="./img/logo.png" type="image/png">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Font Awesome v6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pap+Zc91Y4v0+k1HuTgX+Fg5Y+r4Yug3oXvF/HHGzGdF1w3LxOjLkT5y85XoZSmk5bHoYJYhZ9vT0xQF0qKXnQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
     <!-- Material Icons -->
     <link rel="stylesheet"
@@ -65,96 +68,162 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./style/index.css">
-    <link rel="stylesheet" href="./style/bootstrap.min.css">
 
     <title>KCEAP Scholarships - Fund Your Education</title>
+
+    <style>
+        .top-notice {
+            font-size: 0.775rem;
+            z-index: 1035;
+            background-color: #ffc107;
+            /* example yellow notice */
+            color: #212529;
+            text-align: center;
+            padding: 2px 0;
+        }
+
+        .navbar {
+            min-height: 64px;
+            z-index: 1030;
+        }
+
+        /* Prevent nav links wrapping */
+        .navbar-nav .nav-link {
+            white-space: nowrap;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 8rem 0 4rem;
+            /* default top padding */
+            position: relative;
+            transition: padding-top 0.3s ease;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+    </style>
+
 </head>
 
 <body>
 
-   
 
 
-   <?php if (isset($_SESSION['applysuccess'])): ?>
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-success">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="successModalLabel">Application Submitted</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <span class="material-symbols-outlined fs-1 text-success mb-2">check_circle</span>
-                    <?= $_SESSION['applysuccess'] ?>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
-        });
-    </script>
-    <?php unset($_SESSION['applysuccess']); ?>
-<?php endif; ?>
 
-<?php if (isset($_SESSION['applyfailed'])): ?>
-    <div class="modal fade" id="failedModal" tabindex="-1" aria-labelledby="failedModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-danger">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="failedModalLabel">Application Failed</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <span class="material-symbols-outlined fs-1 text-danger mb-2">error</span>
-                    <?= $_SESSION['applyfailed'] ?>
+    <?php if (isset($_SESSION['applysuccess'])): ?>
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-success">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="successModalLabel">Application Submitted</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <span class="material-symbols-outlined fs-1 text-success mb-2">check_circle</span>
+                        <?= $_SESSION['applysuccess'] ?>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var failedModal = new bootstrap.Modal(document.getElementById('failedModal'));
-            failedModal.show();
-        });
-    </script>
-    <?php unset($_SESSION['applyfailed']); ?>
-<?php endif; ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+            });
+        </script>
+        <?php unset($_SESSION['applysuccess']); ?>
+    <?php endif; ?>
 
-<?php if ($collegeLimitReached): ?>
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <strong>Notice:</strong> College applications have reached the limit.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php endif; ?>
+    <?php if (isset($_SESSION['applyfailed'])): ?>
+        <div class="modal fade" id="failedModal" tabindex="-1" aria-labelledby="failedModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="failedModalLabel">Application Failed</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <span class="material-symbols-outlined fs-1 text-danger mb-2">error</span>
+                        <?= $_SESSION['applyfailed'] ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var failedModal = new bootstrap.Modal(document.getElementById('failedModal'));
+                failedModal.show();
+            });
+        </script>
+        <?php unset($_SESSION['applyfailed']); ?>
+    <?php endif; ?>
 
-<?php if ($hsLimitReached): ?>
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <strong>Notice:</strong> High School applications have reached the limit.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php endif; ?>
+    <!-- Top Notice -->
+    <?php if ($collegeLimitReached || !$collegeActive || $hsLimitReached || !$hsActive): ?>
+        <div class="top-notice alert alert-warning mb-0 text-center w-100 py-2 position-fixed top-0 start-0 zindex-1030">
+            <?php if ($collegeLimitReached): ?>
+                <strong>College:</strong> Applications have reached the limit.
+            <?php elseif (!$collegeActive && $collegeDeadlineNote): ?>
+                <strong>College:</strong> <?= $collegeDeadlineNote ?>
+            <?php endif; ?>
+
+            <?php if (($collegeLimitReached || !$collegeActive) && ($hsLimitReached || !$hsActive)): ?>
+                <span class="mx-2">|</span>
+            <?php endif; ?>
+
+            <?php if ($hsLimitReached): ?>
+                <strong>Highschool:</strong> Applications have reached the limit.
+            <?php elseif (!$hsActive && $hsDeadlineNote): ?>
+                <strong>Highschool:</strong> <?= $hsDeadlineNote ?>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top shadow-sm " style="top: <?php echo ($collegeLimitReached || !$collegeActive || $hsLimitReached || !$hsActive) ? '40px' : '0'; ?>;">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="./img/logo.png" alt="KCEAP Logo" width="40" height="auto"
-                    class="d-inline-block align-text-top">
+                <img src="./img/logo.png" alt="KCEAP Logo" width="40" height="auto" class="d-inline-block align-text-top">
                 <span class="brand-text ms-2">KCEAP Scholarships</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="material-symbols-outlined text-white">menu</span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#features">Key features</a></li>
                     <li class="nav-item"><a class="nav-link" href="#eligibility">Eligibility</a></li>
-                    <li class="nav-item"><a class="nav-link <?php if (!$collegeActive || $collegeLimitReached) echo 'disabled'; ?>" href="<?php echo ($collegeActive && !$collegeLimitReached) ? 'collegeapply.php' : '#'; ?>" <?php if (!$collegeActive || $collegeLimitReached) echo 'aria-disabled="true"'; ?>><?php echo $collegeLimitReached ? 'College (Limit Reached)' : 'College' . $collegeDeadlineNote; ?></a></li>
-                    <li class="nav-item"><a class="nav-link <?php if (!$hsActive || $hsLimitReached) echo 'disabled'; ?>" href="<?php echo ($hsActive && !$hsLimitReached) ? 'highschoolapply.php' : '#'; ?>" <?php if (!$hsActive || $hsLimitReached) echo 'aria-disabled="true"'; ?>><?php echo $hsLimitReached ? 'Highschool (Limit Reached)' : 'Highschool' . $hsDeadlineNote; ?></a></li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php if (!$collegeActive || $collegeLimitReached) echo 'disabled'; ?>"
+                            href="<?php echo ($collegeActive && !$collegeLimitReached) ? 'collegeapply.php' : '#'; ?>"
+                            <?php if (!$collegeActive || $collegeLimitReached) echo 'aria-disabled="true"'; ?>>
+                            <?php echo $collegeLimitReached ? 'College (Limit Reached)' : 'College'; ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php if (!$hsActive || $hsLimitReached) echo 'disabled'; ?>"
+                            href="<?php echo ($hsActive && !$hsLimitReached) ? 'highschoolapply.php' : '#'; ?>"
+                            <?php if (!$hsActive || $hsLimitReached) echo 'aria-disabled="true"'; ?>>
+                            <?php echo $hsLimitReached ? 'Highschool (Limit Reached)' : 'Highschool'; ?>
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="announcement.php">Announcement</a></li>
                 </ul>
             </div>
@@ -165,23 +234,22 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
     <section class="hero-section" id="home">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6">
+                <div class="col-sm-6">
                     <h1 class="hero-title">Unlock Your Academic Potential with KCEAP Scholarships</h1>
                     <p class="hero-subtitle">Financial support for deserving students to achieve their educational
                         dreams</p>
-                    <div class="d-flex gap-3 mt-4">
-                        <!-- Button triggers modal -->
-                    </div>
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
-                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                        alt="Students celebrating graduation" class="img-fluid rounded-4 shadow" width="100%">
+                    <img src="https://img.freepik.com/free-photo/scholarship-application-form-foundation-concept_53876-132191.jpg?t=st=1770550299~exp=1770553899~hmac=ffe2c731e3cc6531b6c9189af0740807fe1fee0c95bab982a7ee6012420a0fde"
+                        alt="Students using computers for scholarship applications"
+                        class="img-fluid rounded-4 shadow"
+                        width="100%">
                 </div>
             </div>
         </div>
     </section>
 
-    
+
 
     <!-- Key Features Section -->
     <section class="py-5 bg-light" id="features">
@@ -203,10 +271,9 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                             <ul class="list-unstyled">
                                 <li class="mb-2"><span
                                         class="material-symbols-outlined text-success me-2">check_circle</span>
-                                    Role-based dashboards</li>
+                                    Profile</li>
                                 <li class="mb-2"><span
-                                        class="material-symbols-outlined text-success me-2">check_circle</span> Profile
-                                    verification</li>
+                                        class="material-symbols-outlined text-success me-2">check_circle</span>Schedules</li>
                                 <li><span class="material-symbols-outlined text-success me-2">check_circle</span> Login
                                     security</li>
                             </ul>
@@ -230,7 +297,7 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                                 every stage.</p>
                             <ul class="list-unstyled">
                                 <li class="mb-2"><span
-                                        class="material-symbols-outlined text-success me-2">check_circle</span> Status
+                                        class="material-symbols-outlined text-success me-2">check_circle</span> Email
                                     notifications</li>
                                 <li class="mb-2"><span
                                         class="material-symbols-outlined text-success me-2">check_circle</span> Document
@@ -257,14 +324,16 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                             <p class="card-text">Generate reports for scholarship distribution, demographics, and
                                 performance insights.</p>
                             <ul class="list-unstyled">
+
                                 <li class="mb-2"><span
                                         class="material-symbols-outlined text-success me-2">check_circle</span>
-                                    Real-time dashboards</li>
+                                    Dashboards</li>
                                 <li class="mb-2"><span
-                                        class="material-symbols-outlined text-success me-2">check_circle</span> Export
-                                    to Excel/PDF</li>
-                                <li><span class="material-symbols-outlined text-success me-2">check_circle</span> Visual
-                                    performance graphs</li>
+                                        class="material-symbols-outlined text-success me-2">check_circle</span>
+                                    View reports</li>
+                                <li class="mb-2"><span
+                                        class="material-symbols-outlined text-success me-2">check_circle</span>
+                                    Analytics</li>
                             </ul>
                         </div>
                         <div class="card-footer bg-transparent border-0">
@@ -380,7 +449,7 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                     <div class="p-4 border rounded shadow-sm h-100">
                         <span class="material-symbols-outlined text-primary fs-1">check_circle</span>
                         <h5 class="mt-3">Receive Decision</h5>
-                        <p class="small">Get notified about your application status via system notification or email.
+                        <p class="small">Get notified about your application status via email.
                         </p>
                     </div>
                 </div>
@@ -448,7 +517,7 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                     <h2 class="mb-3">Ready to Transform Your Future?</h2>
                     <p class="lead mb-4">Join thousands of students who have achieved their academic dreams with KCEAP
                         scholarships.</p>
-                   
+
                 </div>
             </div>
         </div>
@@ -464,7 +533,7 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                             class="d-inline-block align-text-top me-2">
                         <span class="brand-text fs-5">KCEAP Scholarships</span>
                     </a>
-                    <p>Empowering students through financial support and educational opportunities since 2003.</p>
+                    <p>Empowering students through financial support and educational opportunities since 2020.</p>
                     <div class="social-icons">
                         <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
@@ -491,7 +560,7 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                     <ul class="list-unstyled text-white-50">
                         <li class="mb-2 d-flex align-items-start">
                             <span class="material-symbols-outlined text-primary me-2">location_on</span>
-                            123 Education Ave, Suite 200<br>Academic City, AC 12345
+                            Old City Hall, Kabankalan City, Negros Occidental.
                         </li>
                         <li class="mb-2 d-flex align-items-center">
                             <span class="material-symbols-outlined text-primary me-2">mail</span>
@@ -499,7 +568,7 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                         </li>
                         <li class="d-flex align-items-center">
                             <span class="material-symbols-outlined text-primary me-2">call</span>
-                            (555) 123-4567
+                            09766448484
                         </li>
                     </ul>
                 </div>
@@ -512,21 +581,16 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
                 <div class="col-md-6 text-center text-md-start">
                     <p class="mb-0 text-white-50">&copy; 2023 KCEAP Scholarships. All rights reserved.</p>
                 </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="#" class="text-white-50 text-decoration-none me-3">Privacy Policy</a>
-                    <a href="#" class="text-white-50 text-decoration-none">Terms of Service</a>
-                </div>
             </div>
         </div>
     </footer>
 
 
-  
+
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="./script/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>

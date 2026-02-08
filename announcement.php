@@ -74,11 +74,11 @@ if (isset($conn)) {
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="index.php">
                 <img src="./img/logo.png" alt="KCEAP Logo" width="40" height="auto" class="me-2">
-                <span class="brand-text">KCEAP Scholarships</span>
+                <span class="brand-text text-white">KCEAP Scholarships</span>
             </a>
         </div>
     </nav>
