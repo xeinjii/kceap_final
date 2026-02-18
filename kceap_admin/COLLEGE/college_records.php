@@ -101,7 +101,7 @@ $result = $conn->query($sql);
         <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
     <?php endif; ?>
 
-    <section class="py-5">
+    <section class="py-4">
         <div class="container">
             <div class="card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -120,7 +120,7 @@ $result = $conn->query($sql);
                     </button>
 
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-bordered table-hover table-striped align-middle">
                         <thead>
                             <tr>
@@ -146,35 +146,25 @@ $result = $conn->query($sql);
                                     <tr>
                                         <td><?= $i++ ?></td>
                                         <td title="<?= htmlspecialchars($row['first_name']) ?>">
-                                            <?= htmlspecialchars($row['first_name']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['first_name']) ?></td>
                                         <td title="<?= htmlspecialchars($row['middle_name']) ?>">
-                                            <?= htmlspecialchars($row['middle_name']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['middle_name']) ?></td>
                                         <td title="<?= htmlspecialchars($row['last_name']) ?>">
-                                            <?= htmlspecialchars($row['last_name']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['last_name']) ?></td>
                                         <td title="<?= htmlspecialchars($row['school']) ?>">
-                                            <?= htmlspecialchars($row['school']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['school']) ?></td>
                                         <td title="<?= htmlspecialchars($row['course']) ?>">
-                                            <?= htmlspecialchars($row['course']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['course']) ?></td>
                                         <td title="<?= htmlspecialchars($row['year_level']) ?>">
-                                            <?= htmlspecialchars($row['year_level']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['year_level']) ?></td>
                                         <td title="<?= htmlspecialchars($row['address']) ?>">
-                                            <?= htmlspecialchars($row['address']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['address']) ?></td>
                                         <td title="<?= htmlspecialchars($row['phone_number']) ?>">
-                                            <?= htmlspecialchars($row['phone_number']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['phone_number']) ?></td>
                                         <td title="<?= htmlspecialchars($row['email']) ?>">
-                                            <?= htmlspecialchars($row['email']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['email']) ?></td>
                                         <td title="<?= htmlspecialchars($row['semester']) ?>">
-                                            <?= htmlspecialchars($row['semester']) ?>
-                                        </td>
+                                            <?= htmlspecialchars($row['semester']) ?></td>
                                         <td><?= htmlspecialchars($row['status']) ?></td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-warning me-1 edit-btn" title="Edit"
@@ -212,6 +202,7 @@ $result = $conn->query($sql);
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </section>
@@ -283,23 +274,25 @@ $result = $conn->query($sql);
     </div>
 
     <!-- Reset Confirmation Modal -->
-<div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <form method="POST" action="reset_statuses.php" class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="resetModalLabel">Confirm Reset</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to reset <strong>all applicant statuses</strong> to <strong>pending</strong>? This action cannot be undone.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-danger">Yes, Reset All</button>
-      </div>
-    </form>
-  </div>
-</div>
+    <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form method="POST" action="reset_statuses.php" class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="resetModalLabel">Confirm Reset</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reset <strong>all applicant statuses</strong> to
+                        <strong>pending</strong>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Reset All</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
     <!-- Scripts -->

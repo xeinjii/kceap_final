@@ -3,7 +3,12 @@ session_start();
 include '../config/config.php';
 include 'header.php';
 
-$sql = "SELECT * FROM admin  ORDER BY id ASC";
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+$sql = "SELECT * FROM admin ORDER BY id ASC";
 $result = mysqli_query($conn, $sql);
 $count = 1;
 ?>
@@ -16,195 +21,255 @@ $count = 1;
         <!-- Main Content -->
         <div class="main-content flex-grow-1">
 
-            <!-- Top Navbar -->
+            <!-- Top Navbar (Menu Removed) -->
             <nav class="navbar navbar-expand navbar-light sticky-top mb-4 shadow-sm bg-white px-3">
                 <div class="container-fluid">
-                    <button class="btn btn-link d-block me-3" id="sidebarCollapseBtn">
-                        <span class="material-symbols-outlined">menu</span>
-                    </button>
                     <a class="navbar-brand fw-semibold fs-4" href="#">Admin Accounts</a>
+
                     <button class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#addAccountModal">
                         <i class="bi bi-person-plus-fill me-1"></i> Add Account
                     </button>
                 </div>
-            </nav><br><br>
+            </nav></br>
 
-            <!-- Enhanced Admin Accounts Table -->
-            <div class="container px-4">
-                <div class="card shadow-sm rounded-4 border-0">
-                    <div class="card-header bg-primary text-white rounded-top-4">
-                        <h5 class="mb-0">List of Admin Accounts</h5>
+
+            <!-- Admin Accounts Table -->
+            <div class="container px-4 pb-5">
+                <div class="card p-4 border-0 shadow-sm rounded-4">
+
+                    <!-- Session Messages -->
+                    <?php
+                    $session_messages = [
+                        'message' => 'success',
+                        'error' => 'danger'
+                    ];
+                    foreach ($session_messages as $key => $type):
+                        if (isset($_SESSION[$key])):
+                            ?>
+                            <div class="alert alert-<?= $type ?> alert-dismissible fade show mx-4 session-message">
+                                <?= htmlspecialchars($_SESSION[$key]) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <?php
+                            unset($_SESSION[$key]);
+                        endif;
+                    endforeach;
+                    ?>
+
+                    <script>
+                        setTimeout(() => {
+                            document.querySelectorAll('.session-message').forEach(message => {
+                                message.classList.remove('show');
+                                message.classList.add('fade');
+                                setTimeout(() => message.remove(), 500);
+                            });
+                        }, 2000);
+                    </script>
+
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 text-primary">
+                            <span class="material-symbols-outlined align-middle me-1">
+                                admin_panel_settings
+                            </span>
+                            List of Admin Accounts
+                        </h5>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Full Name</th>
-                                        <th>Username</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (mysqli_num_rows($result) > 0): ?>
-                                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                            <tr>
-                                                <td><?= $count++ ?></td>
-                                                <td><?= htmlspecialchars($row['fullname']) ?></td>
-                                                <td><?= htmlspecialchars($row['username']) ?></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-warning me-2">
-                                                        <i class="bi bi-pencil-square"></i> Edit
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger">
-                                                        <i class="bi bi-trash"></i> Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    <?php else: ?>
+
+                    <?php $rowCount = mysqli_num_rows($result); ?>
+
+                    <div class="table-responsive"
+                        style="<?= $rowCount > 7 ? 'max-height: 400px; overflow-y: auto;' : '' ?>">
+                        <table class="table table-bordered table-hover table-striped align-middle">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <th style="width:5%">#</th>
+                                    <th>Full Name</th>
+                                    <th>Username</th>
+                                    <th style="width:20%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($rowCount > 0): ?>
+                                    <?php $count = 1; ?>
+                                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted">No admin accounts found.</td>
+                                            <td><?= $count++ ?></td>
+                                            <td><?= htmlspecialchars($row['fullname']) ?></td>
+                                            <td><?= htmlspecialchars($row['username']) ?></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning me-2 editBtn"
+                                                    data-fullname="<?= htmlspecialchars($row['fullname']) ?>"
+                                                    data-username="<?= htmlspecialchars($row['username']) ?>">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </button>
+
+                                                <button class="btn btn-sm btn-danger deleteBtn"
+                                                    data-username="<?= htmlspecialchars($row['username']) ?>">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </td>
                                         </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            No admin accounts found.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
+
                 </div>
             </div>
 
-            <!-- Enhanced Add Account Modal -->
-            <div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountLabel"
-                aria-hidden="true">
+            <!-- Add Account Modal -->
+            <div class="modal fade" id="addAccountModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <form action="addacc_process.php" method="post" class="modal-content">
                         <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title" id="addAccountLabel">Add New Admin</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title">Add New Admin</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
+
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="fullname" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="fullname" name="fullname"
-                                    placeholder="Enter full name" required>
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="fullname" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username"
-                                    placeholder="Enter username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="pass" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="pass" name="password"
-                                    placeholder="Enter password" required minlength="8"
-                                    oninput="checkPasswordStrength(this.value)">
 
-                                <!-- Strength bar -->
-                                <div class="progress mt-2" style="height: 6px;">
-                                    <div id="passwordStrengthBar" class="progress-bar" role="progressbar"
-                                        style="width: 0%;"></div>
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" name="username" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" id="pass" name="password" required
+                                    minlength="8" oninput="checkPasswordStrength(this.value)">
+
+                                <div class="progress mt-2" style="height:6px;">
+                                    <div id="passwordStrengthBar" class="progress-bar"></div>
                                 </div>
-
-                                <!-- Strength text -->
-                                <small id="passwordStrengthText" class="form-text"></small>
+                                <small id="passwordStrengthText"></small>
                             </div>
-
                         </div>
+
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" name="submit" id="saveAccountBtn" class="btn btn-success"
-                                disabled>Save Account</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <button type="submit" id="saveAccountBtn" class="btn btn-success" disabled>
+                                Save Account
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
 
             <!-- Edit Account Modal -->
-            <div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountLabel"
-                aria-hidden="true">
+            <div class="modal fade" id="editAccountModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <form id="editForm" method="post" class="modal-content">
                         <div class="modal-header bg-warning text-white">
-                            <h5 class="modal-title" id="editAccountLabel">Edit Admin Account</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title">Edit Admin Account</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
+
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="editFullName" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="editFullName" name="fullname" required>
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="editFullName" name="fullname" class="form-control" required>
                             </div>
+
                             <div class="mb-3">
-                                <label for="editUsername" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="editUsername" name="username" required>
+                                <label class="form-label">Username</label>
+                                <input type="text" id="editUsername" name="username" class="form-control">
                             </div>
+
                             <div class="mb-3">
-                                <label for="editNewUsername" class="form-label">New Username</label>
-                                <input type="text" class="form-control" id="editNewUsername" name="new_username"
-                                    placeholder="Enter new username">
-                            </div>
-                            <div class="mb-3">
-                                <label for="editPassword" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="editPassword" name="password"
+                                <label class="form-label">New Password</label>
+                                <input type="password" id="editPassword" name="password" class="form-control"
                                     placeholder="Leave blank to keep current password">
                             </div>
                         </div>
+
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-warning">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-warning">
+                                Save Changes
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
 
+            <div class="modal fade" id="deleteModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form method="POST" action="delete_admin_process.php" class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p id="deleteMessage"></p>
+                            <input type="hidden" name="username" id="deleteUsername">
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="submit" class="btn btn-danger">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
         </div>
     </div>
 
+    <!-- Scripts -->
     <script>
-        document.getElementById('sidebarCollapseBtn').addEventListener('click', function () {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-            document.querySelector('.main-content').classList.toggle('collapsed');
-        });
+        document.addEventListener("DOMContentLoaded", function () {
 
-        // Handle Edit Button Click
-        document.querySelectorAll('.btn-warning').forEach(button => {
-            button.addEventListener('click', function () {
-                const row = this.closest('tr');
-                const fullName = row.children[1].textContent.trim();
-                const username = row.children[2].textContent.trim();
+            document.querySelectorAll('.editBtn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const fullName = this.dataset.fullname;
+                    const username = this.dataset.username;
 
-                // Populate the modal with existing data
-                document.getElementById('editFullName').value = fullName;
-                document.getElementById('editUsername').value = username;
-                document.getElementById('editPassword').value = '';
+                    document.getElementById('editFullName').value = fullName;
+                    document.getElementById('editUsername').value = username;
+                    document.getElementById('editPassword').value = '';
+                    document.getElementById('editForm').action =
+                        `edit_admin_process.php?username=${username}`;
 
-                // Set the form action dynamically
-                document.getElementById('editForm').action = `edit_admin_process.php?username=${username}`;
-
-                // Show the modal
-                const editModal = new bootstrap.Modal(document.getElementById('editAccountModal'));
-                editModal.show();
+                    new bootstrap.Modal(document.getElementById('editAccountModal')).show();
+                });
             });
-        });
 
-        // Handle Delete Button Click
-        document.querySelectorAll('.btn-danger').forEach(button => {
-            button.addEventListener('click', function () {
-                const row = this.closest('tr');
-                const username = row.children[2].textContent.trim();
+            document.querySelectorAll('.deleteBtn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const username = this.dataset.username;
 
-                if (confirm(`Are you sure you want to delete the admin account for ${username}?`)) {
-                    window.location.href = `delete_admin_process.php?username=${username}`;
-                }
+                    document.getElementById('deleteUsername').value = username;
+                    document.getElementById('deleteMessage').innerText =
+                        `Are you sure you want to delete the admin account for "${username}"?`;
+
+                    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+                });
             });
+
         });
     </script>
 
     <script>
         function checkPasswordStrength(password) {
             let strength = 0;
-
             if (password.length >= 8) strength++;
             if (/[a-z]/.test(password)) strength++;
             if (/[A-Z]/.test(password)) strength++;
@@ -215,49 +280,38 @@ $count = 1;
             const text = document.getElementById("passwordStrengthText");
             const saveBtn = document.getElementById("saveAccountBtn");
 
-            let strengthText = "";
-            let strengthClass = "";
-            let barWidth = 0;
+            const levels = ["Very weak", "Weak", "Medium", "Strong", "Very strong"];
+            const colors = ["danger", "warning", "info", "primary", "success"];
 
-            if (strength <= 1) {
-                barWidth = 20;
-                strengthText = "Very weak";
-                strengthClass = "bg-danger";
-                saveBtn.disabled = true;
-            } else if (strength === 2) {
-                barWidth = 40;
-                strengthText = "Weak";
-                strengthClass = "bg-warning";
-                saveBtn.disabled = true;
-            } else if (strength === 3) {
-                barWidth = 60;
-                strengthText = "Medium";
-                strengthClass = "bg-info";
-                saveBtn.disabled = false;
-            } else if (strength === 4) {
-                barWidth = 80;
-                strengthText = "Strong";
-                strengthClass = "bg-primary";
-                saveBtn.disabled = false;
-            } else if (strength === 5) {
-                barWidth = 100;
-                strengthText = "Very strong";
-                strengthClass = "bg-success";
-                saveBtn.disabled = false;
-            }
+            const index = Math.min(strength - 1, 4);
 
-            bar.style.width = barWidth + "%";
-            bar.className = "progress-bar " + strengthClass;
-            text.textContent = strengthText;
-            text.className = "form-text text-" + strengthClass.split('-')[1]; // match text color
+            if (strength < 3) saveBtn.disabled = true;
+            else saveBtn.disabled = false;
+
+            bar.style.width = (strength * 20) + "%";
+            bar.className = "progress-bar bg-" + colors[index];
+            text.innerText = levels[index] || "";
+            text.className = "form-text text-" + colors[index];
         }
+    </script>
+
+    <script>
+        document.querySelectorAll('.deleteBtn').forEach(button => {
+            button.addEventListener('click', function () {
+                const username = this.dataset.username;
+                document.getElementById('deleteUsername').value = username;
+                document.getElementById('deleteMessage').innerText =
+                    `Are you sure you want to delete the admin account for "${username}"? This action cannot be undone.`;
+
+                new bootstrap.Modal(document.getElementById('deleteModal')).show();
+            });
+        });
     </script>
 
 
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../script/bootstrap.bundle.min.js"></script>
 
 </body>
 

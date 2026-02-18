@@ -119,7 +119,7 @@ try {
             . "<b>Time:</b> " . htmlspecialchars($scheduleTime) . "<br>"
             . "<b>Login Email:</b> " . htmlspecialchars($emailAddress) . "<br>"
             . "<b>Password:</b> " . htmlspecialchars($auto_password) . "<br><br>"
-            . "Your account status is set to <strong>incomplete</strong>. Please log in and complete the required information.<br><br>"
+            . "Your account status is set to <strong>Waiting for result</strong>. Please log in and complete the required information.<br><br>"
             . "You can log in using the following link:<br>"
             . "<a href='https://example.com/login'>https://example.com/login</a><br><br>"
             . "Sincerely,<br>KCEAP Team";

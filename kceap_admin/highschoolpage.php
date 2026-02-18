@@ -2,6 +2,11 @@
 session_start();
 include 'header.php';
 require_once '../config/config.php';
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: index.php");
+    exit();
+}
 ?>
 <body>
     <div class="d-flex">
@@ -64,6 +69,13 @@ require_once '../config/config.php';
             </div>
         </div>
     </div>
+
+    <script>
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+    </script>
     <script src="../script/bootstrap.bundle.min.js"></script>
 </body>
 </html>

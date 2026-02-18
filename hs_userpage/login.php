@@ -74,14 +74,25 @@ if (isset($_SESSION['user_id'])) {
             <h2>Highschool Account Login</h2>
 
             <?php if (!empty($_SESSION['message'])): ?>
-                <div
+                <div id="session-msg"
                     class="msg alert <?php echo ($_SESSION['message_type'] ?? '') === 'success' ? 'alert-success' : 'alert-danger'; ?>">
                     <?php
                     echo htmlspecialchars($_SESSION['message']);
-                    unset($_SESSION['message'], $_SESSION['message_type']);
+                    unset($_SESSION['message'], $_SESSION['message_type']); // unset server-side
                     ?>
                 </div>
+
+                <script>
+                    // Hide the message after 2 seconds (2000 milliseconds)
+                    setTimeout(() => {
+                        const msgDiv = document.getElementById('session-msg');
+                        if (msgDiv) {
+                            msgDiv.style.display = 'none';
+                        }
+                    }, 2000);
+                </script>
             <?php endif; ?>
+
 
             <form action="login_process.php" method="post" autocomplete="off" novalidate>
                 <div class="form-floating mb-3">

@@ -7,6 +7,9 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit();
 }
+
+// Get the admin fullname from session
+$adminName = $_SESSION['admin_name'];
 ?>
 
 <body>
@@ -21,6 +24,13 @@ if (!isset($_SESSION['admin_id'])) {
             <nav class="navbar navbar-expand navbar-light mb-4">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="#">KCEAP Admin Dashboard</a>
+
+                    <!-- Display admin fullname on the right -->
+                    <div class="ms-auto">
+                        <span class="fw-bold">Welcome,
+                            <?php echo htmlspecialchars($adminName); ?>
+                        </span>
+                    </div>
                 </div>
             </nav>
 
@@ -237,7 +247,8 @@ if (!isset($_SESSION['admin_id'])) {
                             <canvas id="collegeStatusChart" height="200"></canvas>
                             <div class="mt-2 small text-muted">Pending: <?= $collegeStatusData['pending'] ?> · Active:
                                 <?= $collegeStatusData['active'] ?> · Incomplete:
-                                <?= $collegeStatusData['incomplete'] ?></div>
+                                <?= $collegeStatusData['incomplete'] ?>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-4">
@@ -245,7 +256,8 @@ if (!isset($_SESSION['admin_id'])) {
                             <h6>Highschool Status Distribution</h6>
                             <canvas id="hsStatusChart" height="200"></canvas>
                             <div class="mt-2 small text-muted">Pending: <?= $hsStatusData['pending'] ?> · Active:
-                                <?= $hsStatusData['active'] ?> · Incomplete: <?= $hsStatusData['incomplete'] ?></div>
+                                <?= $hsStatusData['active'] ?> · Incomplete: <?= $hsStatusData['incomplete'] ?>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-4">

@@ -31,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: dashboard.php");
             exit;
         } else {
-            echo "<script>alert('Incorrect password.'); window.location='login.php';</script>";
-            exit;
+            $_SESSION['error'] = "Incorrect password.";
+           header("Location: index.php");
         }
     } else {
-        echo "<script>alert('Username not found.'); window.location='login.php';</script>";
-        exit;
+        $_SESSION['error'] = "Username not found.";
+        header("Location: index.php");
     }
 }
 ?>
