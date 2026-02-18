@@ -32,36 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // ---------------- DUMMY FILTER CONFIG ----------------
-    $dummyNames = ['test', 'dummy', 'john', 'doe', 'lorem', 'admin', 'user', 'abc', 'xyz'];
+    // ---------------- DUMMY FILTER CONFIG (EMAIL + PHONE ONLY) ----------------
     $dummyEmails = ['test@gmail.com', 'dummy@gmail.com', 'example@example.com'];
     $dummyDomains = ['mailinator.com', 'tempmail.com', '10minutemail.com', 'dispostable.com'];
 
     // ---------------- FUNCTIONS ----------------
-    function isSuspiciousName($name, $dummyNames) {
-        $name = strtolower(trim($name));
-
-        // Exact dummy name
-        if (in_array($name, $dummyNames)) return true;
-
-        // Part match for multi-word names
-        $parts = explode(' ', $name);
-        foreach ($parts as $part) {
-            if (in_array($part, $dummyNames)) return true;
-        }
-
-        // Numeric only
-        if (preg_match('/^\d+$/', $name)) return true;
-
-        // Repeated letters (aaaa, bbbb)
-        if (preg_match('/^(.)\1+$/', $name)) return true;
-
-        // Too short (1-2 characters)
-        if (strlen($name) <= 2) return true;
-
-        return false;
-    }
-
     function isSuspiciousEmail($email, $dummyEmails, $dummyDomains) {
         $email = strtolower(trim($email));
 
@@ -97,16 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         return false;
     }
 
-    // ---------------- APPLY DUMMY FILTERS ----------------
-    if (
-        isSuspiciousName($firstName, $dummyNames) ||
-        isSuspiciousName($middleName, $dummyNames) ||
-        isSuspiciousName($lastName, $dummyNames)
-    ) {
-        $_SESSION['college_apply_error'] = "Please enter valid names. Dummy or suspicious names are not allowed.";
-        header("Location: collegeapply.php");
-        exit();
-    }
+    // ---------------- APPLY VALIDATIONS ----------------
 
     if (isSuspiciousEmail($emailAddress, $dummyEmails, $dummyDomains)) {
         $_SESSION['college_apply_error'] = "Please use a valid email address. Dummy or disposable emails are not allowed.";
@@ -128,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($checkSchedule->num_rows > 0) {
         $_SESSION['college_apply_error'] = "This email is already used for an application.";
+        $checkSchedule->close();
         header("Location: collegeapply.php");
         exit();
     }
@@ -141,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($checkAccount->num_rows > 0) {
         $_SESSION['college_apply_error'] = "This email is already registered as a college account.";
+        $checkAccount->close();
         header("Location: collegeapply.php");
         exit();
     }
@@ -151,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare("INSERT INTO college_schedule 
         (firstName, middleName, lastName, school, course, yearLevel, address, phoneNumber, emailAddress) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
     $stmt->bind_param(
         'sssssssss',
         $firstName,
