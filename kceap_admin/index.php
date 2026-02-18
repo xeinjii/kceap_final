@@ -62,13 +62,24 @@ if (isset($_SESSION['admin_id'])) {
             <img src="../img/logo.png" alt="KCEAP Logo">
             <h2>ADMIN LOGIN</h2>
             <?php if (isset($_SESSION['error'])): ?>
-                <div class="alert alert-danger text-center">
+                <div id="error-alert" class="alert alert-danger text-center">
                     <?php
                     echo $_SESSION['error'];
-                    unset($_SESSION['error']);
+                    unset($_SESSION['error']); // still unset it on server for next request     
                     ?>
                 </div>
+
+                <script>
+                    // Hide the alert after 2 seconds (2000 milliseconds)
+                    setTimeout(function () {
+                        const alertDiv = document.getElementById('error-alert');
+                        if (alertDiv) {
+                            alertDiv.style.display = 'none';
+                        }
+                    }, 2000);
+                </script>
             <?php endif; ?>
+
             <form action="login_process.php" method="POST">
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username"

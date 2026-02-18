@@ -74,16 +74,16 @@ $renewals = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     <?php unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
 <?php endif; ?>
 
-<section class="py-5">
+<section class="py-4">
     <div class="container">
         <div class="card p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="mb-0"><span class="material-symbols-outlined align-middle me-1 text-primary">refresh</span> Renewal Requests</h3>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                 <table class="table table-bordered table-hover table-striped align-middle">
-                    <thead>
+                    <thead style="position: sticky; top: 0; z-index: 2;">
                         <tr>
                            <th>#</th>
                             <th>Applicant</th>

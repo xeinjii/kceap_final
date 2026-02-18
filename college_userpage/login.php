@@ -11,6 +11,7 @@ if (isset($_SESSION['user_id'])) {
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>College Login - KCEAP</title>
@@ -26,6 +27,7 @@ if (isset($_SESSION['user_id'])) {
             display: flex;
             align-items: center;
         }
+
         .login-form {
             background: white;
             padding: 2rem;
@@ -36,87 +38,107 @@ if (isset($_SESSION['user_id'])) {
             margin: auto;
             text-align: center;
         }
+
         .login-form img {
             width: 80px;
             height: auto;
             display: block;
             margin: 0 auto 1rem;
         }
+
         .login-form h2 {
             color: #333;
             text-align: center;
             margin-bottom: 1rem;
             font-weight: 600;
         }
+
         .password-toggle {
             cursor: pointer;
             user-select: none;
             font-size: 0.875rem;
             color: #6c757d;
         }
+
         .msg {
             margin-bottom: 1rem;
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="login-form">
-        <img src="../img/logo.png" alt="KCEAP Logo">
-        <h2>College Account Login</h2>
+    <div class="container">
+        <div class="login-form">
+            <img src="../img/logo.png" alt="KCEAP Logo">
+            <h2>College Account Login</h2>
 
-        <?php if (!empty($_SESSION['message'])): ?>
-            <div class="msg alert <?php echo ($_SESSION['message_type'] ?? '') === 'success' ? 'alert-success' : 'alert-danger'; ?>">
-                <?php 
-                    echo htmlspecialchars($_SESSION['message']); 
-                    unset($_SESSION['message'], $_SESSION['message_type']); 
-                ?>
-            </div>
-        <?php endif; ?>
-
-        <form action="login_process.php" method="post" autocomplete="off" novalidate>
-            <div class="form-floating mb-3">
-                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
-                <label for="email">Email address</label>
-            </div>
-            <div class="form-floating mb-3">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                <label for="password">Password</label>
-            </div>
-
-            <div class="mb-3 text-start">
-                <div class="form-check password-toggle">
-                    <input type="checkbox" class="form-check-input" id="showPassword">
-                    <label class="form-check-label" for="showPassword">Show Password</label>
+            <?php if (!empty($_SESSION['message'])): ?>
+                <div id="session-msg"
+                    class="msg alert <?php echo ($_SESSION['message_type'] ?? '') === 'success' ? 'alert-success' : 'alert-danger'; ?>">
+                    <?php
+                    echo htmlspecialchars($_SESSION['message']);
+                    unset($_SESSION['message'], $_SESSION['message_type']);
+                    ?>
                 </div>
-            </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2">
-                Login
-            </button>
-        </form>
+                <script>
+                    // Hide the message after 2 seconds
+                    setTimeout(() => {
+                        const msgDiv = document.getElementById('session-msg');
+                        if (msgDiv) {
+                            msgDiv.style.display = 'none'; // instantly hides
+                        }
+                    }, 2000); // 2000ms = 2 seconds
+                </script>
+            <?php endif; ?>
 
-        <hr class="my-3">
 
-<script src="../script/bootstrap.bundle.min.js"></script>
-<script>
-    const showPassword = document.getElementById('showPassword');
-    if (showPassword) {
-        showPassword.addEventListener('change', function() {
-            const password = document.getElementById('password');
-            if (password) password.type = this.checked ? 'text' : 'password';
-        });
-    }
-</script>
+            <form action="login_process.php" method="post" autocomplete="off" novalidate>
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com"
+                        required>
+                    <label for="email">Email address</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                        required>
+                    <label for="password">Password</label>
+                </div>
 
-<script>
-  history.pushState(null, null, location.href);
+                <div class="mb-3 text-start">
+                    <div class="form-check password-toggle">
+                        <input type="checkbox" class="form-check-input" id="showPassword">
+                        <label class="form-check-label" for="showPassword">Show Password</label>
+                    </div>
+                </div>
 
-  window.addEventListener("popstate", function () {
-    history.pushState(null, null, location.href);
-  });
-</script>
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    Login
+                </button>
+            </form>
+
+            <hr class="my-3">
+
+            <script src="../script/bootstrap.bundle.min.js"></script>
+            <script>
+                const showPassword = document.getElementById('showPassword');
+                if (showPassword) {
+                    showPassword.addEventListener('change', function () {
+                        const password = document.getElementById('password');
+                        if (password) password.type = this.checked ? 'text' : 'password';
+                    });
+                }
+            </script>
+
+            <script>
+                history.pushState(null, null, location.href);
+
+                window.addEventListener("popstate", function () {
+                    history.pushState(null, null, location.href);
+                });
+            </script>
 
 </body>
+
 </html>

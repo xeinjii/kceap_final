@@ -7,7 +7,8 @@ $filter = $_GET['filter'] ?? 'all'; // values: all, table (saved only), sent (se
 
 if (isset($conn)) {
     $allowed = ['all', 'table', 'sent'];
-    if (!in_array($filter, $allowed)) $filter = 'all';
+    if (!in_array($filter, $allowed))
+        $filter = 'all';
 
     $sql = "SELECT title, message, created_at, sent FROM announcement";
     if ($filter === 'table') {
@@ -20,10 +21,10 @@ if (isset($conn)) {
     if ($result = $conn->query($sql)) {
         while ($row = $result->fetch_assoc()) {
             $announcements[] = [
-                'title'   => $row['title'],
+                'title' => $row['title'],
                 'content' => $row['message'],
-                'date'    => date('F j, Y g:i A', strtotime($row['created_at'])),
-                'sent'    => (int)$row['sent']
+                'date' => date('F j, Y g:i A', strtotime($row['created_at'])),
+                'sent' => (int) $row['sent']
             ];
         }
         $result->free();
@@ -32,6 +33,7 @@ if (isset($conn)) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>KCEAP Scholarships - Announcements</title>
@@ -51,20 +53,24 @@ if (isset($conn)) {
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             min-height: 100vh;
         }
+
         .brand-text {
             font-weight: 600;
             font-size: 1.3rem;
             color: #1976d2;
         }
+
         .announcement-card {
             border-radius: 1rem;
             box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
         }
+
         .material-symbols-outlined {
             vertical-align: middle;
             font-size: 2rem;
             color: #1976d2;
         }
+
         .announcement-date {
             font-size: 0.95rem;
             color: #1976d2;
@@ -72,6 +78,7 @@ if (isset($conn)) {
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
@@ -83,18 +90,21 @@ if (isset($conn)) {
         </div>
     </nav>
 
+
     <!-- Announcement Section -->
     <section class="py-5" id="announcements">
         <div class="container">
             <div class="text-center mb-4">
                 <span class="material-symbols-outlined fs-1 mb-2">campaign</span>
                 <h2 class="section-title mb-2">Latest Announcements</h2>
-                <p class="section-subtitle text-muted">Stay updated with the latest news and updates from KCEAP Scholarships</p>
+                <p class="section-subtitle text-muted">Stay updated with the latest news and updates from KCEAP
+                    Scholarships</p>
 
                 <!-- Filter radios -->
                 <form id="ann-filter-form" method="get" class="d-inline-block mt-3">
                     <div class="btn-group" role="radiogroup" aria-label="announcement filters">
-                        <input type="radio" class="btn-check" name="filter" id="filter-all" value="all" autocomplete="off" <?= $filter === 'all' ? 'checked' : '' ?>>
+                        <input type="radio" class="btn-check" name="filter" id="filter-all" value="all"
+                            autocomplete="off" <?= $filter === 'all' ? 'checked' : '' ?>>
                         <label class="btn btn-outline-primary" for="filter-all">All</label>
 
                     </div>
@@ -103,21 +113,22 @@ if (isset($conn)) {
 
             <div class="row g-4 justify-content-center">
                 <?php foreach ($announcements as $a): ?>
-                <div class="col-md-8">
-                    <div class="card announcement-card border-0 shadow-sm mb-4">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="material-symbols-outlined me-2">notifications_active</span>
-                                <h4 class="mb-0"><?= htmlspecialchars($a['title']) ?></h4>
+                    <div class="col-md-8">
+                        <div class="card announcement-card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="material-symbols-outlined me-2">notifications_active</span>
+                                    <h4 class="mb-0"><?= htmlspecialchars($a['title']) ?></h4>
+                                </div>
+                                <div class="announcement-date mb-2">
+                                    <span class="material-symbols-outlined align-middle me-1"
+                                        style="font-size:1.2rem;">calendar_month</span>
+                                    <?= htmlspecialchars($a['date']) ?>
+                                </div>
+                                <p class="mb-0"><?= htmlspecialchars($a['content']) ?></p>
                             </div>
-                            <div class="announcement-date mb-2">
-                                <span class="material-symbols-outlined align-middle me-1" style="font-size:1.2rem;">calendar_month</span>
-                                <?= htmlspecialchars($a['date']) ?>
-                            </div>
-                            <p class="mb-0"><?= htmlspecialchars($a['content']) ?></p>
                         </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -137,10 +148,14 @@ if (isset($conn)) {
                 <div class="col-lg-2 col-md-4">
                     <h5 class="mb-3">Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="index.php#home" class="text-white-50 text-decoration-none">Home</a></li>
-                        <li class="mb-2"><a href="announcement.php" class="text-white-50 text-decoration-none">Announcement</a></li>
-                        <li class="mb-2"><a href="index.php#features" class="text-white-50 text-decoration-none">Key features</a></li>
-                        <li class="mb-2"><a href="index.php#eligibility" class="text-white-50 text-decoration-none">Eligibility</a></li>
+                        <li class="mb-2"><a href="index.php#home" class="text-white-50 text-decoration-none">Home</a>
+                        </li>
+                        <li class="mb-2"><a href="announcement.php"
+                                class="text-white-50 text-decoration-none">Announcement</a></li>
+                        <li class="mb-2"><a href="index.php#features" class="text-white-50 text-decoration-none">Key
+                                features</a></li>
+                        <li class="mb-2"><a href="index.php#eligibility"
+                                class="text-white-50 text-decoration-none">Eligibility</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-4">
@@ -148,7 +163,7 @@ if (isset($conn)) {
                     <ul class="list-unstyled text-white-50">
                         <li class="mb-2 d-flex align-items-start">
                             <span class="material-symbols-outlined text-primary me-2">location_on</span>
-                            123 Education Ave, Suite 200<br>Academic City, AC 12345
+                            Old City Hall, Kabankalan City, Negros Occidental.
                         </li>
                         <li class="mb-2 d-flex align-items-center">
                             <span class="material-symbols-outlined text-primary me-2">mail</span>
@@ -156,7 +171,7 @@ if (isset($conn)) {
                         </li>
                         <li class="d-flex align-items-center">
                             <span class="material-symbols-outlined text-primary me-2">call</span>
-                            (555) 123-4567
+                            09766448484
                         </li>
                     </ul>
                 </div>
@@ -166,14 +181,11 @@ if (isset($conn)) {
                 <div class="col-md-6 text-center text-md-start">
                     <p class="mb-0 text-white-50">&copy; 2023 KCEAP Scholarships. All rights reserved.</p>
                 </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="#" class="text-white-50 text-decoration-none me-3">Privacy Policy</a>
-                    <a href="#" class="text-white-50 text-decoration-none">Terms of Service</a>
-                </div>
             </div>
         </div>
     </footer>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

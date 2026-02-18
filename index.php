@@ -509,81 +509,180 @@ if (!$hsActive && !empty($settings['highschool']['deadline'])) {
     </section>
 
 
-    <!-- Call to Action -->
-    <section class="py-5 bg-primary text-white" id="apply-now">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <h2 class="mb-3">Ready to Transform Your Future?</h2>
-                    <p class="lead mb-4">Join thousands of students who have achieved their academic dreams with KCEAP
-                        scholarships.</p>
-
-                </div>
+<!-- About Us Section -->
+<section id="about-us" class="d-flex align-items-center" style="min-height: 70vh; background: linear-gradient(135deg, #0d6efd, #6610f2); color: white;">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <!-- Image Section -->
+            <div class="col-lg-5 text-center text-lg-start">
+                <img src="img/logo.png" alt="KCEAP Scholarship Info System" 
+                     class="img-fluid rounded-circle shadow-lg about-img" style="max-width: 300px;">
+            </div>
+            <!-- Text Section -->
+            <div class="col-lg-7">
+                <h2 class="fw-bold mb-3">About <span style="color:#ffc107;">KCEAP Scholarships</span></h2>
+                <p class="lead mb-3 about-text">
+                    The <strong>KCEAP Scholarship Information and Management System</strong> empowers students by providing a centralized platform to efficiently manage scholarship applications, deadlines, and schedules. 
+                    Since 2020, it has supported students in achieving their educational goals through financial aid, academic resources, and structured guidance.
+                </p>
+                <p class="about-text" style="color: rgba(255,255,255,0.8); font-size: 0.95rem;">
+                    Our mission is to make scholarships more accessible, transparent, and manageable for every aspiring student, ensuring that no opportunity is missed. Join us in creating a brighter future through education.
+                </p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-5">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <a class="d-flex align-items-center mb-3 text-decoration-none" href="#">
-                        <img src="./img/logo.png" alt="KCEAP Logo" width="40" height="auto"
-                            class="d-inline-block align-text-top me-2">
-                        <span class="brand-text fs-5">KCEAP Scholarships</span>
+<!-- Custom CSS for Media Queries -->
+<style>
+    /* Mobile & Small Screens */
+    @media (max-width: 992px) {
+        #about-us .about-img {
+            max-width: 200px !important;
+            margin-bottom: 1.5rem;
+        }
+        #about-us .about-text {
+            font-size: 0.95rem !important;
+        }
+        #about-us h2 {
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        #about-us .row {
+            flex-direction: column-reverse;
+            text-align: center;
+        }
+    }
+
+    /* Extra Small Screens */
+    @media (max-width: 576px) {
+        #about-us {
+            min-height: 60vh;
+            padding: 3rem 1rem;
+        }
+        #about-us .about-img {
+            max-width: 150px !important;
+        }
+        #about-us h2 {
+            font-size: 1.5rem;
+        }
+        #about-us .about-text {
+            font-size: 0.9rem !important;
+        }
+    }
+</style>
+
+
+
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <a class="d-flex align-items-center mb-3 text-decoration-none" href="#">
+                    <img src="img/logo.png" alt="KCEAP Logo" width="40" class="d-inline-block align-text-top me-2">
+                    <span class="brand-text fs-5">kceap scholarships</span>
+                </a>
+                <p class="text-white-50">empowering students through financial support and educational opportunities since 2020.</p>
+
+                <!-- Developer photos -->
+                <p><strong>Developers</strong></p>
+                <div class="social-icons d-flex mt-3">
+                    <a href="#" class="me-3" data-bs-toggle="modal" data-bs-target="#devModal" data-name="Matt Andrei Belano" data-role="Backend Developer" data-desc="sdsjdjsds" data-img="img/d1.jpg">
+                        <img src="img/d1.jpg" alt="developer 1" class="rounded-circle" width="30" height="30">
                     </a>
-                    <p>Empowering students through financial support and educational opportunities since 2020.</p>
-                    <div class="social-icons">
-                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
+                    <a href="#" class="me-3" data-bs-toggle="modal" data-bs-target="#devModal" data-name="Bob Johnson" data-role="Backend Developer" data-desc="sdsereererejdjsds" data-img="img/d2.jpg">
+                        <img src="img/d2.jpg" alt="developer 2" class="rounded-circle" width="30" height="30">
+                    </a>
+                    <a href="#" class="me-3" data-bs-toggle="modal" data-bs-target="#devModal" data-name="Carol Lee" data-role="UI/UX Designer" data-desc="sdsjdjsdqqqqqqqqqs" data-img="img/d3.jpg">
+                        <img src="img/d3.jpg" alt="developer 3" class="rounded-circle" width="30" height="30">
+                    </a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#devModal" data-name="David Kim" data-role="Fullstack Developer" data-img="img/d4.jpg">
+                        <img src="img/d4.jpg" alt="developer 4" class="rounded-circle" width="30" height="30">
+                    </a>
                 </div>
-
-                <div class="col-lg-2 col-md-4">
-                    <h5 class="mb-3">Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#home" class="text-white-50 text-decoration-none">Home</a></li>
-                        <li class="mb-2"><a href="#scholarships"
-                                class="text-white-50 text-decoration-none">Scholarships</a></li>
-                        <li class="mb-2"><a href="#eligibility" class="text-white-50 text-decoration-none">Key
-                                features</a></li>
-                        <li class="mb-2"><a href="#features" class="text-white-50 text-decoration-none">Eligibility</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3 col-md-4">
-                    <h5 class="mb-3">Contact Us</h5>
-                    <ul class="list-unstyled text-white-50">
-                        <li class="mb-2 d-flex align-items-start">
-                            <span class="material-symbols-outlined text-primary me-2">location_on</span>
-                            Old City Hall, Kabankalan City, Negros Occidental.
-                        </li>
-                        <li class="mb-2 d-flex align-items-center">
-                            <span class="material-symbols-outlined text-primary me-2">mail</span>
-                            scholarships@kceap.org
-                        </li>
-                        <li class="d-flex align-items-center">
-                            <span class="material-symbols-outlined text-primary me-2">call</span>
-                            09766448484
-                        </li>
-                    </ul>
-                </div>
-
             </div>
 
-            <hr class="my-4 border-secondary">
+            <div class="col-lg-2 col-md-4">
+                <h6 class="mb-3 text-uppercase">quick links</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#home" class="text-white-50 text-decoration-none">home</a></li>
+                    <li class="mb-2"><a href="#features" class="text-white-50 text-decoration-none">key features</a></li>
+                    <li class="mb-2"><a href="#eligibility" class="text-white-50 text-decoration-none">eligibility</a></li>
+                    <li class="mb-2"><a href="announcement.php" class="text-white-50 text-decoration-none">announcement</a></li>
+                </ul>
+            </div>
 
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0 text-white-50">&copy; 2023 KCEAP Scholarships. All rights reserved.</p>
-                </div>
+            <div class="col-lg-3 col-md-4">
+                <h6 class="mb-3 text-uppercase">contact us</h6>
+                <ul class="list-unstyled text-white-50">
+                    <li class="mb-2 d-flex align-items-start">
+                        <span class="material-symbols-outlined text-primary me-2">location_on</span>
+                        old city hall, kabankalan city, negros occidental.
+                    </li>
+                    <li class="mb-2 d-flex align-items-center">
+                        <span class="material-symbols-outlined text-primary me-2">mail</span>
+                        scholarships@kceap.org
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <span class="material-symbols-outlined text-primary me-2">call</span>
+                        09766448484
+                    </li>
+                </ul>
             </div>
         </div>
-    </footer>
+
+        <hr class="my-4 border-secondary">
+
+        <div class="row">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0 text-white-50">&copy; 2023 kceap scholarships. all rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Developer Modal -->
+<div class="modal fade" id="devModal" tabindex="-1" aria-labelledby="devModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="devModalLabel"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" id="devModalImg" alt="Developer Photo" class="rounded-circle mb-3" width="120" height="120">
+                <h6 id="devModalRole" class="mb-2"></h6>
+                <p id="devModalDesc" class="text-white-50"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (only once, after body content) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const devModal = document.getElementById('devModal');
+    devModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const name = button.getAttribute('data-name');
+        const role = button.getAttribute('data-role');
+        const desc = button.getAttribute('data-desc') || "No description provided.";
+        const img = button.getAttribute('data-img');
+
+        document.getElementById('devModalLabel').textContent = name;
+        document.getElementById('devModalRole').textContent = role;
+        document.getElementById('devModalDesc').textContent = desc;
+        document.getElementById('devModalImg').src = img;
+        document.getElementById('devModalImg').alt = name;
+    });
+</script>
+
+
+
+
 
 
 
