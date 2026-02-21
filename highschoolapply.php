@@ -1,4 +1,36 @@
-<?php session_start(); ?>
+<?php
+session_start();
+require_once __DIR__ . '/config/config.php'; // include DB connection
+
+// Load JSON settings
+$jsonPath = __DIR__ . '/kceap_admin/deadline.json';
+$collegeActive = false;
+$collegeLimitReached = false;
+$hsActive = false;
+$hsLimitReached = false;
+
+if (file_exists($jsonPath)) {
+    $settings = json_decode(file_get_contents($jsonPath), true);
+    $now = new DateTime();
+
+    // ----------------------
+    // High School
+    // ----------------------
+    if (isset($settings['highschool'])) {
+        $hsDeadline = new DateTime($settings['highschool']['deadline']);
+        $hsActive = !$settings['highschool']['disabled'] && $now <= $hsDeadline;
+
+        // Get current highschool applications count from DB
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM highschool_schedule");
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $hsApplicationsCount = (int)$result['count'];
+
+        // Compare with limit from JSON
+        $hsLimitReached = $hsApplicationsCount >= (int)$settings['highschool']['limit'];
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -160,7 +192,7 @@
                             <option value="SALONG">BARANGAY SALONG</option>
                             <option value="TABUGON">BARANGAY TABUGON</option>
                             <option value="TAGOC">BARANGAY TAGOC</option>
-                            <option value="TAGOC">BARANGAY TAGUKON</option>
+                            <option value="TAGUKON">BARANGAY TAGUKON</option>
                             <option value="TALUBANGI">BARANGAY TALUBANGI</option>
                             <option value="TAMPALON">BARANGAY TAMPALON</option>
                             <option value="TAN-AWAN">BARANGAY TAN-AWAN</option>
@@ -179,11 +211,27 @@
                 </div>
 
                 <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+                    <button type="submit" id="submitBtn"
+                        class="btn btn-primary btn-lg" 
+                        <?= (!$hsActive || $hsLimitReached) ? 'disabled' : ''; ?>>
+                        <?= $hsLimitReached ? 'High School Full' : (!$hsActive ? 'High School Closed' : 'Submit Application'); ?>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+ <!-- Prevent form submission if disabled -->
+    <script>
+        const form = document.getElementById('hsForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function(e) {
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                alert("Registration is currently closed or full.");
+            }
+        });
+    </script>
 
     <!-- Auto Uppercase for text inputs -->
     <script>

@@ -2,6 +2,58 @@
 session_start();
 require_once '../config/config.php';
 
+// Handle delete request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    $index = (int)($_POST['index'] ?? -1);
+    
+    if ($index < 0) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Invalid index']);
+        exit;
+    }
+    
+    $file = __DIR__ . '/announcements.json';
+    if (file_exists($file)) {
+        $data = json_decode(file_get_contents($file), true) ?: [];
+        
+        if (isset($data[$index])) {
+            // Get announcement details for database deletion
+            $announcement = $data[$index];
+            $title = $announcement['title'] ?? '';
+            $created_at = $announcement['created_at'] ?? '';
+            $attachment = $announcement['attachment'] ?? null;
+            
+            // Delete from database using title and created_at as identifiers
+            if (!empty($title) && !empty($created_at)) {
+                $stmt = $conn->prepare("DELETE FROM announcement WHERE title = ? AND created_at = ?");
+                $stmt->bind_param('ss', $title, $created_at);
+                $stmt->execute();
+                $stmt->close();
+            }
+            
+            // Delete attachment file if exists
+            if ($attachment && file_exists(__DIR__ . '/../' . $attachment)) {
+                @unlink(__DIR__ . '/../' . $attachment);
+            }
+            
+            // Remove from JSON array and reindex
+            unset($data[$index]);
+            $data = array_values($data);
+            
+            // Save updated JSON
+            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+            
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'Announcement deleted']);
+            exit;
+        }
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Announcement not found']);
+    exit;
+}
+
 $title = trim($_POST['title'] ?? '');
 $message = trim($_POST['message'] ?? '');
 $audience = $_POST['audience'] ?? [];

@@ -8,86 +8,19 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-// Get unique school years from both tables
-$years_sql = "
-    SELECT DISTINCT school_year FROM hs_reports 
-    UNION 
-    SELECT DISTINCT school_year FROM college_reports 
-    ORDER BY school_year DESC
-";
-$years_result = $conn->query($years_sql);
-$school_years = $years_result ? $years_result->fetch_all(MYSQLI_ASSOC) : [];
+// Get stats for both archives
+$hs_count_sql = "SELECT COUNT(*) as total FROM hs_reports";
+$college_count_sql = "SELECT COUNT(*) as total FROM college_reports";
 
-// Get selected school year (default to most recent)
-$selected_year = $_GET['year'] ?? ($school_years[0]['school_year'] ?? date('Y') . '-' . (date('Y') + 1));
+$hs_count = $conn->query($hs_count_sql)->fetch_assoc()['total'] ?? 0;
+$college_count = $conn->query($college_count_sql)->fetch_assoc()['total'] ?? 0;
 
-// Get data based on selected year
-$hs_sql = "
-    SELECT applicant_id, first_name, middle_name, last_name, school, strand, year_level, semester, 
-           address, phone_number, email, status, school_year, archived_at
-    FROM hs_reports 
-    WHERE school_year = ? 
-    ORDER BY school ASC, first_name ASC
-";
+// Get school years
+$hs_years_sql = "SELECT DISTINCT school_year FROM hs_reports ORDER BY school_year DESC LIMIT 5";
+$college_years_sql = "SELECT DISTINCT school_year FROM college_reports ORDER BY school_year DESC LIMIT 5";
 
-$college_sql = "
-    SELECT applicant_id, first_name, middle_name, last_name, school, course, year_level, semester, 
-           address, phone_number, email, status, school_year, created_at
-    FROM college_reports 
-    WHERE school_year = ? 
-    ORDER BY school ASC, first_name ASC
-";
-
-// Prepare and execute queries
-$hs_stmt = $conn->prepare($hs_sql);
-$hs_stmt->bind_param("s", $selected_year);
-$hs_stmt->execute();
-$hs_data = $hs_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$hs_stmt->close();
-
-$college_stmt = $conn->prepare($college_sql);
-$college_stmt->bind_param("s", $selected_year);
-$college_stmt->execute();
-$college_data = $college_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$college_stmt->close();
-
-// Group highschool data by school
-$hs_by_school = [];
-foreach ($hs_data as $row) {
-    $school = $row['school'] ?? 'Unspecified';
-    if (!isset($hs_by_school[$school])) {
-        $hs_by_school[$school] = [];
-    }
-    $hs_by_school[$school][] = $row;
-}
-
-// Group college data by school
-$college_by_school = [];
-foreach ($college_data as $row) {
-    $school = $row['school'] ?? 'Unspecified';
-    if (!isset($college_by_school[$school])) {
-        $college_by_school[$school] = [];
-    }
-    $college_by_school[$school][] = $row;
-}
-
-// Get unique schools from both datasets
-$all_schools = array_unique(array_merge(array_keys($hs_by_school), array_keys($college_by_school)));
-sort($all_schools);
-
-// Get selected school filter (default to 'all')
-$selected_school = $_GET['school'] ?? 'all';
-
-// Filter data by selected school
-if ($selected_school !== 'all') {
-    $hs_by_school = array_filter($hs_by_school, function($key) use ($selected_school) {
-        return $key === $selected_school;
-    }, ARRAY_FILTER_USE_KEY);
-    
-    $college_by_school = array_filter($college_by_school, function($key) use ($selected_school) {
-        return $key === $selected_school;
-    }, ARRAY_FILTER_USE_KEY);
-}
+$hs_years = $conn->query($hs_years_sql)->fetch_all(MYSQLI_ASSOC) ?? [];
+$college_years = $conn->query($college_years_sql)->fetch_all(MYSQLI_ASSOC) ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -95,7 +28,237 @@ if ($selected_school !== 'all') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Archive - KCEAP</title>
+    <title>Archives - KCEAP</title>
+    <link rel="icon" href="../img/logo.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="../style/kceapadmin.css" rel="stylesheet">
+    <style>
+        .archive-card { 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            transition: all 0.3s ease;
+            border: none;
+            height: 100%;
+        }
+        .archive-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12); 
+        }
+        .archive-header { 
+            padding: 2rem; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+        }
+        .archive-header.hs { background: linear-gradient(135deg, #20c997, #17a2b8); }
+        .archive-header.college { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+        .archive-icon { font-size: 3rem; }
+        .archive-title { margin: 0; font-weight: 700; font-size: 1.5rem; }
+        .archive-body { padding: 2rem; }
+        .stat-box { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+        .stat-box.hs { border-left-color: #20c997; }
+        .stat-box.college { border-left-color: #0d6efd; }
+        .stat-label { font-size: 0.9rem; color: #666; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; }
+        .stat-value.hs { color: #20c997; }
+        .stat-value.college { color: #0d6efd; }
+        .action-buttons { display: flex; gap: 0.75rem; flex-direction: column; }
+        .action-btn { 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 600; 
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .action-btn.hs { 
+            background: #20c997; 
+            color: white; 
+        }
+        .action-btn.hs:hover { 
+            background: #17a2b8; 
+            color: white; 
+        }
+        .action-btn.college { 
+            background: #0d6efd; 
+            color: white; 
+        }
+        .action-btn.college:hover { 
+            background: #0a58ca; 
+            color: white; 
+        }
+        .main-content .container-fluid { padding-left: 2rem; padding-right: 2rem; }
+        .page-header { margin-bottom: 3rem; }
+        .page-header h2 { font-weight: 700; color: #333; }
+        .navbar { background-color: white !important; border-bottom: 2px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .navbar .navbar-brand { color: #333 !important; font-weight: 700; }
+        .navbar .btn { color: #666; }
+        .year-list { 
+            list-style: none; 
+            padding: 0; 
+            margin: 1rem 0 0 0; 
+        }
+        .year-list li { 
+            padding: 0.5rem 0; 
+            font-size: 0.9rem; 
+            color: #666;
+        }
+        .year-list li:before { 
+            content: "→ "; 
+            margin-right: 0.5rem; 
+            color: #ccc; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="d-flex">
+    <?php include 'aside.php'; ?>
+    
+    <!-- Main Content -->
+    <div class="main-content flex-grow-1">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand navbar-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <span class="material-symbols-outlined align-middle me-2">archive</span>
+                    KCEAP Archives
+                </a>
+            </div>
+        </nav><br><br><br>
+
+        <!-- Page Content -->
+        <div class="container-fluid py-4">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2 class="mb-2">
+                    <span class="material-symbols-outlined align-middle me-2">archive</span>
+                    Graduate Archives
+                </h2>
+                <p class="text-muted">Access and manage archived records for highschool and college graduates</p>
+            </div>
+
+            <!-- Archive Cards -->
+            <div class="row g-4">
+                <!-- Highschool Archive -->
+                <div class="col-lg-6">
+                    <div class="archive-card">
+                        <div class="archive-header hs">
+                            <span class="material-symbols-outlined archive-icon">school</span>
+                            <h4 class="archive-title">Highschool Archives</h4>
+                        </div>
+                        <div class="archive-body">
+                            <div class="stat-box hs">
+                                <div class="stat-label">Total Graduates</div>
+                                <div class="stat-value hs"><?= number_format($hs_count) ?></div>
+                            </div>
+
+                            <?php if (!empty($hs_years)): ?>
+                                <div>
+                                    <label class="form-label fw-semibold">Recent Years</label>
+                                    <ul class="year-list">
+                                        <?php foreach ($hs_years as $year): ?>
+                                            <li>
+                                                <a href="archive_highschool.php?year=<?= urlencode($year['school_year']) ?>" class="text-decoration-none">
+                                                    <?= htmlspecialchars($year['school_year']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="action-buttons mt-4">
+                                <a href="archive_highschool.php" class="action-btn hs">
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    View All Records
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- College Archive -->
+                <div class="col-lg-6">
+                    <div class="archive-card">
+                        <div class="archive-header college">
+                            <span class="material-symbols-outlined archive-icon">school</span>
+                            <h4 class="archive-title">College Archives</h4>
+                        </div>
+                        <div class="archive-body">
+                            <div class="stat-box college">
+                                <div class="stat-label">Total Graduates</div>
+                                <div class="stat-value college"><?= number_format($college_count) ?></div>
+                            </div>
+
+                            <?php if (!empty($college_years)): ?>
+                                <div>
+                                    <label class="form-label fw-semibold">Recent Years</label>
+                                    <ul class="year-list">
+                                        <?php foreach ($college_years as $year): ?>
+                                            <li>
+                                                <a href="archive_college.php?year=<?= urlencode($year['school_year']) ?>" class="text-decoration-none">
+                                                    <?= htmlspecialchars($year['school_year']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="action-buttons mt-4">
+                                <a href="archive_college.php" class="action-btn college">
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    View All Records
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="mt-5 p-4 bg-light border-start border-4 border-info rounded">
+                <h6 class="mb-2">
+                    <span class="material-symbols-outlined align-middle me-2">info</span>
+                    About Archives
+                </h6>
+                <p class="mb-0 text-muted">
+                    Archive records contain information about graduates who have successfully completed their scholarship programs. 
+                    Each archive includes detailed student information, academic records, and completion dates. 
+                    You can filter by school year, school, and export data to CSV format for further analysis.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Archives - KCEAP</title>
     <link rel="icon" href="../img/logo.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -136,257 +299,120 @@ if ($selected_school !== 'all') {
         <!-- Top Navbar -->
         <nav class="navbar navbar-expand navbar-light mb-4">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">KCEAP Archives</a>
+                <a class="navbar-brand" href="#">
+                    <span class="material-symbols-outlined align-middle me-2">archive</span>
+                    KCEAP Archives
+                </a>
             </div>
         </nav><br><br><br>
+
         <!-- Page Content -->
         <div class="container-fluid py-4">
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <h5 class="mb-3"><span class="material-symbols-outlined align-middle me-2">filter_list</span>Filter Archives</h5>
-        <form method="GET" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label for="yearSelect" class="form-label fw-semibold">School Year</label>
-                <select class="form-select" id="yearSelect" name="year" onchange="this.form.submit()">
-                    <?php if (empty($school_years)): ?>
-                        <option>No data available</option>
-                    <?php else: ?>
-                        <?php foreach ($school_years as $year): ?>
-                            <option value="<?= htmlspecialchars($year['school_year']) ?>" <?= ($year['school_year'] === $selected_year) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($year['school_year']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2 class="mb-2">
+                    <span class="material-symbols-outlined align-middle me-2">archive</span>
+                    Graduate Archives
+                </h2>
+                <p class="text-muted">Access and manage archived records for highschool and college graduates</p>
             </div>
-            <div class="col-md-4">
-                <label for="schoolSelect" class="form-label fw-semibold">School</label>
-                <select class="form-select" id="schoolSelect" name="school" onchange="this.form.submit()">
-                    <option value="all" <?= ($selected_school === 'all') ? 'selected' : '' ?>>All Schools</option>
-                    <?php if (!empty($all_schools)): ?>
-                        <?php foreach ($all_schools as $school): ?>
-                            <option value="<?= htmlspecialchars($school) ?>" <?= ($school === $selected_school) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($school) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
+
+            <!-- Archive Cards -->
+            <div class="row g-4">
+                <!-- Highschool Archive -->
+                <div class="col-lg-6">
+                    <div class="archive-card">
+                        <div class="archive-header hs">
+                            <span class="material-symbols-outlined archive-icon">school</span>
+                            <h4 class="archive-title">Highschool Archives</h4>
+                        </div>
+                        <div class="archive-body">
+                            <div class="stat-box hs">
+                                <div class="stat-label">Total Graduates</div>
+                                <div class="stat-value hs"><?= number_format($hs_count) ?></div>
+                            </div>
+
+                            <?php if (!empty($hs_years)): ?>
+                                <div>
+                                    <label class="form-label fw-semibold">Recent Years</label>
+                                    <ul class="year-list">
+                                        <?php foreach ($hs_years as $year): ?>
+                                            <li>
+                                                <a href="archive_highschool.php?year=<?= urlencode($year['school_year']) ?>" class="text-decoration-none">
+                                                    <?= htmlspecialchars($year['school_year']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="action-buttons mt-4">
+                                <a href="archive_highschool.php" class="action-btn hs">
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    View All Records
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- College Archive -->
+                <div class="col-lg-6">
+                    <div class="archive-card">
+                        <div class="archive-header college">
+                            <span class="material-symbols-outlined archive-icon">school</span>
+                            <h4 class="archive-title">College Archives</h4>
+                        </div>
+                        <div class="archive-body">
+                            <div class="stat-box college">
+                                <div class="stat-label">Total Graduates</div>
+                                <div class="stat-value college"><?= number_format($college_count) ?></div>
+                            </div>
+
+                            <?php if (!empty($college_years)): ?>
+                                <div>
+                                    <label class="form-label fw-semibold">Recent Years</label>
+                                    <ul class="year-list">
+                                        <?php foreach ($college_years as $year): ?>
+                                            <li>
+                                                <a href="archive_college.php?year=<?= urlencode($year['school_year']) ?>" class="text-decoration-none">
+                                                    <?= htmlspecialchars($year['school_year']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="action-buttons mt-4">
+                                <a href="archive_college.php" class="action-btn college">
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    View All Records
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+
+            <!-- Info Box -->
+            <div class="mt-5 p-4 bg-light border-start border-4 border-info rounded">
+                <h6 class="mb-2">
+                    <span class="material-symbols-outlined align-middle me-2">info</span>
+                    About Archives
+                </h6>
+                <p class="mb-0 text-muted">
+                    Archive records contain information about graduates who have successfully completed their scholarship programs. 
+                    Each archive includes detailed student information, academic records, and completion dates. 
+                    You can filter by school year, school, and export data to CSV format for further analysis.
+                </p>
+            </div>
+        </div>
     </div>
-
-    <?php if (!empty($hs_data) || !empty($college_data)): ?>
-
-        <!-- Tab Navigation -->
-        <ul class="nav nav-tabs mb-4" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="hs-tab" data-bs-toggle="tab" data-bs-target="#hs-content" type="button" role="tab" aria-controls="hs-content" aria-selected="true">
-                    <span class="material-symbols-outlined align-middle me-1">school</span>Highschool
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="college-tab" data-bs-toggle="tab" data-bs-target="#college-content" type="button" role="tab" aria-controls="college-content" aria-selected="false">
-                   <span class="material-symbols-outlined align-middle me-1">school</span>College
-                </button>
-            </li>
-        </ul>
-
-        <!-- Tab Content -->
-        <div class="tab-content">
-            <!-- Highschool Tab -->
-            <div class="tab-pane fade show active" id="hs-content" role="tabpanel" aria-labelledby="hs-tab">
-                <?php if (!empty($hs_data)): ?>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0"><span class="material-symbols-outlined align-middle me-2">school</span>Highschool Graduates - <?= htmlspecialchars($selected_year) ?></h5>
-                        <span class="badge-count"><?= count($hs_data) ?> Total</span>
-                    </div>
-
-                    <div class="stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Schools</span>
-                            <span class="stat-value"><?= count($hs_by_school) ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Graduates</span>
-                            <span class="stat-value"><?= count($hs_data) ?></span>
-                        </div>
-                    </div>
-
-                    <!-- Highschool Schools -->
-                    <div class="mt-4">
-                        <?php foreach ($hs_by_school as $school => $students): ?>
-                            <div class="school-section">
-                                <div class="school-header" data-bs-toggle="collapse" data-bs-target="#hs-<?= md5($school) ?>">
-                                    <div>
-                                        <h5 class="mb-0"><?= htmlspecialchars($school) ?></h5>
-                                        <small class="text-muted"><?= count($students) ?> student(s)</small>
-                                    </div>
-                                    <span class="material-symbols-outlined">expand_more</span>
-                                </div>
-                                <div class="collapse show" id="hs-<?= md5($school) ?>">
-                                    <div class="school-data mt-2">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Name</th>
-                                                         <th>Adress</th>
-                                                         <th>School</th>
-                                                        <th>Strand</th>
-                                                        <th>Year Level</th>
-                                                        <th>Semester</th>
-                                                        <th>Status</th>
-                                                        <th>Email</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php $idx = 1; foreach ($students as $student): ?>
-                                                        <tr>
-                                                            <td><?= $idx++ ?></td>
-                                                            <td>
-                                                                <strong><?= htmlspecialchars($student['first_name'] . ' ' . ($student['middle_name'] ? substr($student['middle_name'], 0, 1) . '. ' : '') . $student['last_name']) ?></strong>
-                                                            </td>
-                                                            <td><?= htmlspecialchars($student['address'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['school'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['strand'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['year_level'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['semester'] ?? 'N/A') ?></td>
-                                                            <td><span class="badge bg-success status-badge"><?= htmlspecialchars($student['status'] ?? 'graduated') ?></span></td>
-                                                            <td><small><?= htmlspecialchars($student['email'] ?? 'N/A') ?></small></td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-
-                <?php else: ?>
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <span class="material-symbols-outlined">info</span>
-                        </div>
-                        <p>No highschool graduate records found for <?= htmlspecialchars($selected_year) ?></p>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- College Tab -->
-            <div class="tab-pane fade" id="college-content" role="tabpanel" aria-labelledby="college-tab">
-                <?php if (!empty($college_data)): ?>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0"><span class="material-symbols-outlined align-middle me-2">school</span>College Graduates - <?= htmlspecialchars($selected_year) ?></h5>
-                        <span class="badge-count"><?= count($college_data) ?> Total</span>
-                    </div>
-
-                    <div class="stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Schools</span>
-                            <span class="stat-value"><?= count($college_by_school) ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Graduates</span>
-                            <span class="stat-value"><?= count($college_data) ?></span>
-                        </div>
-                    </div>
-
-                    <!-- College Schools -->
-                    <div class="mt-4">
-                        <?php foreach ($college_by_school as $school => $students): ?>
-                            <div class="school-section">
-                                <div class="school-header" data-bs-toggle="collapse" data-bs-target="#college-<?= md5($school) ?>">
-                                    <div>
-                                        <h5 class="mb-0"><?= htmlspecialchars($school) ?></h5>
-                                        <small class="text-muted"><?= count($students) ?> student(s)</small>
-                                    </div>
-                                    <span class="material-symbols-outlined">expand_more</span>
-                                </div>
-                                <div class="collapse show" id="college-<?= md5($school) ?>">
-                                    <div class="school-data mt-2">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Name</th>
-                                                        <th>Address</th>
-                                                        <th>School</th>
-                                                        <th>Course</th>
-                                                        <th>Year Level</th>
-                                                        <th>Semester</th>
-                                                        <th>Status</th>
-                                                        <th>Email</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php $idx = 1; foreach ($students as $student): ?>
-                                                        <tr>
-                                                            <td><?= $idx++ ?></td>
-                                                            <td>
-                                                                <strong><?= htmlspecialchars($student['first_name'] . ' ' . ($student['middle_name'] ? substr($student['middle_name'], 0, 1) . '. ' : '') . $student['last_name']) ?></strong>
-                                                            </td>
-                                                             <td><?= htmlspecialchars($student['address'] ?? 'N/A') ?></td>
-                                                              <td><?= htmlspecialchars($student['school'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['course'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['year_level'] ?? 'N/A') ?></td>
-                                                            <td><?= htmlspecialchars($student['semester'] ?? 'N/A') ?></td>
-                                                            <td><span class="badge bg-success status-badge"><?= htmlspecialchars($student['status'] ?? 'graduated') ?></span></td>
-                                                            <td><small><?= htmlspecialchars($student['email'] ?? 'N/A') ?></small></td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-
-                <?php else: ?>
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <span class="material-symbols-outlined">info</span>
-                        </div>
-                        <p>No college graduate records found for <?= htmlspecialchars($selected_year) ?></p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-    <?php else: ?>
-        <div class="empty-state">
-            <div class="empty-state-icon">
-                <span class="material-symbols-outlined">folder_open</span>
-            </div>
-            <p>No archived records available</p>
-            <small class="text-muted">Archive records will appear here after graduates complete their scholarships</small>
-        </div>
-    <?php endif; ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Toggle collapse icon rotation
-    document.querySelectorAll('.school-header').forEach(header => {
-        header.addEventListener('click', function() {
-            const icon = this.querySelector('.material-symbols-outlined');
-            const target = document.querySelector(this.getAttribute('data-bs-target'));
-            if (target.classList.contains('show')) {
-                icon.style.transform = 'rotate(0deg)';
-            } else {
-                icon.style.transform = 'rotate(180deg)';
-            }
-        });
-    });
-</script>
-        </div>
-    </div>
-</div>
 
 </body>
 </html>

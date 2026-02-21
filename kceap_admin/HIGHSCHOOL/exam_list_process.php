@@ -27,7 +27,8 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
     $fullName = trim($applicant['first_name'] . ' ' . $applicant['middle_name'] . ' ' . $applicant['last_name']);
 
     // helper: clear schedule fields in highschool_account by email
-    function clearAccountScheduleByEmail($conn, $email) {
+    function clearAccountScheduleByEmail($conn, $email)
+    {
         $upd = $conn->prepare("UPDATE highschool_account SET schedule_date = NULL, schedule_time = NULL WHERE email = ?");
         if ($upd) {
             $upd->bind_param("s", $email);
@@ -40,7 +41,8 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
         try {
             // Check if an account with the same email already exists
             $check = $conn->prepare("SELECT id FROM highschool_account WHERE email = ? LIMIT 1");
-            if ($check === false) throw new Exception($conn->error);
+            if ($check === false)
+                throw new Exception($conn->error);
             $check->bind_param("s", $email);
             $check->execute();
             $check->store_result();
@@ -63,7 +65,8 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
                         address = ?, phone_number = ?, schedule_date = ?, schedule_time = ?, status = ?, semester = ?
                     WHERE email = ?
                 ");
-                if ($update === false) throw new Exception($conn->error);
+                if ($update === false)
+                    throw new Exception($conn->error);
                 $update->bind_param(
                     "isssssssssssss",
                     $applicant['applicant_id'],
@@ -81,7 +84,8 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
                     $semester,
                     $email
                 );
-                if (! $update->execute()) throw new Exception($update->error);
+                if (!$update->execute())
+                    throw new Exception($update->error);
                 $update->close();
 
                 // Remove schedule entry
@@ -102,7 +106,8 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
                     (applicant_id, first_name, middle_name, last_name, school, strand, year_level, address, phone_number, email, schedule_date, schedule_time, status, semester) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ");
-                if ($insert === false) throw new Exception($conn->error);
+                if ($insert === false)
+                    throw new Exception($conn->error);
                 $insert->bind_param(
                     "isssssssssssss",
                     $applicant['applicant_id'],
@@ -120,7 +125,8 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
                     $status,
                     $semester
                 );
-                if (! $insert->execute()) throw new Exception($insert->error);
+                if (!$insert->execute())
+                    throw new Exception($insert->error);
                 $insert->close();
 
                 // Delete schedule entry
@@ -142,11 +148,29 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
                 $mail->addAddress($email, $fullName);
                 $mail->Subject = 'KCEAP Scholarship Exam Status & Account Details';
                 $mail->isHTML(true);
-                $mail->Body = "Dear {$fullName},<br><br>Congratulations! You have been accepted. Your status is now <b>{$status}</b>.<br><br>Please check your account for further details.<br><br>Sincerely,<br>KCEAP Team";
+                $loginLink = "https://yourdomain.com/login.php"; // replace with your actual login URL
+
+                $mail->Body = "
+                    <p>Dear <strong>{$fullName}</strong>,</p>
+                    <p>Congratulations! You have been accepted. Your status is now <b>{$status}</b>.</p>
+                        <p>Please prepare and submit the following documents:</p>
+                            <ul>
+                                <li>Copy of COMELEC or COMELEC certification of grantee, or parent in the case of a minor, as proof of residence within the City of Kabankalan;</li>
+                                <li>Duly registered birth certificate;</li>
+                                <li>Two copies of ID picture taken within six (6) months;</li>
+                                <li>Family Monthly Gross Income of Thirty-thousand pesos (₱30,000.00) or below, as certified by the employer, or Punong Barangay of the Barangay where the family resides upon the absence of the employer;</li>
+                                <li>Latest Report Card or Grade Card issued by the school;</li>
+                                <li>Certificate of Good Moral Character from school.</li>
+                            </ul>
+                    <p>Once ready, you may log in to your account to upload or submit these documents: <a href='{$loginLink}' target='_blank'>Click here to Login</a></p>
+
+                    <p>Sincerely,<br>
+                    KCEAP Team</p>
+                    ";
                 $mail->send();
 
                 if (empty($_SESSION['message']) || $_SESSION['message_type'] !== 'success') {
-                    $_SESSION['message'] = ( $_SESSION['message'] ?? '' ) . " Email sent.";
+                    $_SESSION['message'] = ($_SESSION['message'] ?? '') . " Email sent.";
                     $_SESSION['message_type'] = "success";
                 }
             } catch (Exception $e) {

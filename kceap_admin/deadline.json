@@ -1,12 +1,12 @@
 {
     "college": {
-        "deadline": "2026-02-17T03:00",
-        "limit": 5,
+        "deadline": "2026-02-20T14:45",
+        "limit": 1,
         "disabled": true
     },
     "highschool": {
-        "deadline": "2026-02-17T01:11",
-        "limit": 5,
+        "deadline": "2026-02-20T14:45",
+        "limit": 1,
         "disabled": true
     }
 }

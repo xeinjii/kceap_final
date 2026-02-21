@@ -1,4 +1,37 @@
-<?php session_start(); ?>
+<?php
+session_start();
+require_once __DIR__ . '/config/config.php'; // include DB connection
+
+// Load JSON settings
+$jsonPath = __DIR__ . '/kceap_admin/deadline.json';
+$collegeActive = false;
+$collegeLimitReached = false;
+$hsActive = false;
+$hsLimitReached = false;
+
+if (file_exists($jsonPath)) {
+    $settings = json_decode(file_get_contents($jsonPath), true);
+    $now = new DateTime();
+
+    // ----------------------
+    // College
+    // ----------------------
+    if (isset($settings['college'])) {
+        $collegeDeadline = new DateTime($settings['college']['deadline']);
+        $collegeActive = !$settings['college']['disabled'] && $now <= $collegeDeadline;
+
+        // Get current college applications count from DB
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM college_schedule");
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $collegeApplicationsCount = (int)$result['count'];
+
+        // Compare with limit from JSON
+        $collegeLimitReached = $collegeApplicationsCount >= (int)$settings['college']['limit'];
+    }
+
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -44,7 +77,7 @@
 
 <body>
 
-  <!-- Navbar -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
         <div class="container d-flex align-items-center">
             <!-- Brand + Back Button Inline -->
@@ -225,7 +258,7 @@
                             <option value="SALONG">BARANGAY SALONG</option>
                             <option value="TABUGON">BARANGAY TABUGON</option>
                             <option value="TAGOC">BARANGAY TAGOC</option>
-                            <option value="TAGOC">BARANGAY TAGUKON</option>
+                            <option value="TAGUKON">BARANGAY TAGUKON</option>
                             <option value="TALUBANGI">BARANGAY TALUBANGI</option>
                             <option value="TAMPALON">BARANGAY TAMPALON</option>
                             <option value="TAN-AWAN">BARANGAY TAN-AWAN</option>
@@ -244,7 +277,10 @@
                 </div>
 
                 <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" <?= (!$collegeActive || $collegeLimitReached) ? 'disabled' : ''; ?>
+                        >
+                        Submit Application
+                    </button>
                 </div>
             </form>
         </div>
@@ -268,6 +304,18 @@
         inputs.forEach(input => input.addEventListener('input', () => {
             input.value = input.value.toUpperCase();
         }));
+    </script>
+
+    <script>
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function (e) {
+            if (submitBtn.disabled) {
+                e.preventDefault(); // Prevent form submission
+                alert("Registration is currently closed or full."); // Optional alert
+            }
+        });
     </script>
 
     <script src="./script/bootstrap.bundle.min.js"></script>

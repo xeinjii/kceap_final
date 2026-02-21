@@ -5,8 +5,8 @@ session_start();
 
 if (!isCollegeApplicationEnabled()) {
     $_SESSION['college_apply_error'] = "Sorry, college applications are currently closed.";
-    header("Location: collegeapply.php");
-    exit;
+    header("Location: index.php");
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,67 +22,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phoneNumber   = trim($_POST['phoneNumber']);
     $emailAddress  = trim($_POST['emailAddress']);
 
-    // Sanitize email
     $emailAddress = filter_var($emailAddress, FILTER_SANITIZE_EMAIL);
 
-    // Validate email format
     if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['college_apply_error'] = "Invalid email address format.";
-        header("Location: collegeapply.php");
+        header("Location: index.php");
         exit();
     }
 
-    // ---------------- DUMMY FILTER CONFIG (EMAIL + PHONE ONLY) ----------------
+    // ---------------- DUMMY FILTER ----------------
     $dummyEmails = ['test@gmail.com', 'dummy@gmail.com', 'example@example.com'];
     $dummyDomains = ['mailinator.com', 'tempmail.com', '10minutemail.com', 'dispostable.com'];
 
-    // ---------------- FUNCTIONS ----------------
     function isSuspiciousEmail($email, $dummyEmails, $dummyDomains) {
         $email = strtolower(trim($email));
-
-        // Exact dummy email
         if (in_array($email, $dummyEmails)) return true;
-
-        // Disposable domain
         $domain = substr(strrchr($email, "@"), 1);
         if (in_array($domain, $dummyDomains)) return true;
-
-        // Numeric username only
         $username = strstr($email, '@', true);
         if (preg_match('/^\d+$/', $username)) return true;
-
-        // Repeated letters/numbers in username
         if (preg_match('/^(.)\1+$/', $username)) return true;
-
         return false;
     }
 
     function isSuspiciousPhone($phone) {
-        $phone = preg_replace('/\D/', '', $phone); // Remove non-digits
-
-        // Must be exactly 11 digits
+        $phone = preg_replace('/\D/', '', $phone);
         if (strlen($phone) !== 11) return true;
-
-        // All digits the same (00000000000, 11111111111)
         if (preg_match('/^(.)\1+$/', $phone)) return true;
-
-        // Optional: block common fake prefixes (e.g., 09110000000)
         if (preg_match('/^09(0{9,}|1{9,}|2{9,})$/', $phone)) return true;
-
         return false;
     }
 
-    // ---------------- APPLY VALIDATIONS ----------------
-
     if (isSuspiciousEmail($emailAddress, $dummyEmails, $dummyDomains)) {
-        $_SESSION['college_apply_error'] = "Please use a valid email address. Dummy or disposable emails are not allowed.";
-        header("Location: collegeapply.php");
+        $_SESSION['college_apply_error'] = "Please use a valid email address.";
+        header("Location: index.php");
         exit();
     }
 
     if (isSuspiciousPhone($phoneNumber)) {
         $_SESSION['college_apply_error'] = "Please enter a valid 11-digit phone number.";
-        header("Location: collegeapply.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -93,12 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkSchedule->store_result();
 
     if ($checkSchedule->num_rows > 0) {
-        $_SESSION['college_apply_error'] = "This email is already used for an application.";
+        $_SESSION['college_apply_error'] = "This email is already used.";
         $checkSchedule->close();
-        header("Location: collegeapply.php");
+        header("Location: index.php");
         exit();
     }
-
     $checkSchedule->close();
 
     $checkAccount = $conn->prepare("SELECT id FROM college_account WHERE email = ?");
@@ -107,15 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkAccount->store_result();
 
     if ($checkAccount->num_rows > 0) {
-        $_SESSION['college_apply_error'] = "This email is already registered as a college account.";
+        $_SESSION['college_apply_error'] = "This email is already registered.";
         $checkAccount->close();
-        header("Location: collegeapply.php");
+        header("Location: index.php");
         exit();
     }
-
     $checkAccount->close();
 
-    // ---------------- INSERT APPLICATION ----------------
+    // ---------------- INSERT ----------------
     $stmt = $conn->prepare("INSERT INTO college_schedule 
         (firstName, middleName, lastName, school, course, yearLevel, address, phoneNumber, emailAddress) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -134,15 +111,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if ($stmt->execute()) {
+
+        // Default success message
         $_SESSION['college_apply_success'] = 'Your application has been submitted successfully!';
+
+        // ---------------- CHECK LIMIT ----------------
+        $deadlineFile = __DIR__ . '/kceap_admin/deadline.json';
+        if (file_exists($deadlineFile)) {
+
+            $settings = json_decode(file_get_contents($deadlineFile), true);
+            $collegeLimit = $settings['college']['limit'] ?? 0;
+
+            if ($collegeLimit > 0) {
+                $countResult = $conn->query("SELECT COUNT(*) AS total FROM college_schedule");
+                $currentCount = $countResult->fetch_assoc()['total'];
+
+                if ($currentCount >= $collegeLimit) {
+                    $_SESSION['limit_reached'] = 'college';
+                    $_SESSION['college_apply_success'] =
+                        'Your application has been submitted successfully! College application limit has now been reached.';
+                }
+            }
+        }
+
+        $stmt->close();
+        $conn->close();
+
+        header('Location: index.php');
+        exit();
+
     } else {
         $_SESSION['college_apply_error'] = 'There was an error submitting your application.';
+        $stmt->close();
+        $conn->close();
+        header('Location: index.php');
+        exit();
     }
-
-    $stmt->close();
-    $conn->close();
-
-    header('Location: collegeapply.php');
-    exit();
 }
 ?>

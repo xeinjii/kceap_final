@@ -22,17 +22,6 @@ if (file_exists($deadlineFile)) {
 }
 $appliedCount = $result ? $result->num_rows : 0;
 
-// Update the deadline settings to check the radio button if the limit is reached
-if ($limit > 0 && $appliedCount >= $limit) {
-    $deadlineFile = __DIR__ . '/../deadline.json';
-    if (file_exists($deadlineFile)) {
-        $settings = json_decode(file_get_contents($deadlineFile), true);
-        $settings['highschool']['disabled'] = true;
-        $settings['highschool']['limit'] = $appliedCount; // Record the current applied count
-        file_put_contents($deadlineFile, json_encode($settings, JSON_PRETTY_PRINT));
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="en">

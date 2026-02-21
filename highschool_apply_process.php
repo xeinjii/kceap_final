@@ -5,8 +5,8 @@ session_start();
 
 if (!isHighSchoolApplicationEnabled()) {
     $_SESSION['highschool_apply_error'] = "Sorry, high school applications are currently closed.";
-    header("Location: highschoolapply.php");
-    exit;
+    header("Location: index.php");
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,95 +22,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phoneNumber   = trim($_POST['phoneNumber'] ?? '');
     $emailAddress  = trim($_POST['emailAddress'] ?? '');
 
-    // Sanitize email
     $emailAddress = filter_var($emailAddress, FILTER_SANITIZE_EMAIL);
 
-    // Validate email format
     if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['highschool_apply_error'] = "Invalid email address format.";
-        header("Location: highschoolapply.php");
+        header("Location: index.php");
         exit();
     }
 
-    // ---------------- DUMMY FILTER CONFIG (EMAIL + PHONE ONLY) ----------------
-    $blockedEmailUsernames = [
-        'test','dummy','admin','user','example','sample'
-    ];
-
-    $blockedDomains = [
-        'mailinator.com',
-        'tempmail.com',
-        '10minutemail.com',
-        'dispostable.com',
-        'guerrillamail.com',
-        'yopmail.com'
-    ];
-
     // ---------------- EMAIL VALIDATION ----------------
+    $blockedEmailUsernames = ['test','dummy','admin','user','example','sample'];
+    $blockedDomains = [
+        'mailinator.com','tempmail.com','10minutemail.com',
+        'dispostable.com','guerrillamail.com','yopmail.com'
+    ];
+
     function isSuspiciousEmail($email, $blockedEmailUsernames, $blockedDomains) {
 
         $email = strtolower(trim($email));
 
-        if (!str_contains($email, '@')) {
-            return true;
-        }
+        if (!str_contains($email, '@')) return true;
 
         list($username, $domain) = explode('@', $email);
 
-        // Block disposable domains
-        if (in_array($domain, $blockedDomains)) {
-            return true;
-        }
+        if (in_array($domain, $blockedDomains)) return true;
 
-        // Block numeric-only usernames
-        if (preg_match('/^\d+$/', $username)) {
-            return true;
-        }
+        if (preg_match('/^\d+$/', $username)) return true;
 
-        // Block repeated characters like aaaaa@gmail.com
-        if (preg_match('/^(.)\1{4,}$/', $username)) {
-            return true;
-        }
+        if (preg_match('/^(.)\1{4,}$/', $username)) return true;
 
-        // Block usernames containing blocked words
         foreach ($blockedEmailUsernames as $word) {
-            if (strpos($username, $word) !== false) {
-                return true;
-            }
+            if (strpos($username, $word) !== false) return true;
         }
 
         return false;
     }
 
-    // ---------------- PHONE VALIDATION ----------------
     function isSuspiciousPhone($phone) {
 
         $phone = preg_replace('/\D/', '', $phone);
 
-        // Must start with 09 and be 11 digits
-        if (!preg_match('/^09\d{9}$/', $phone)) {
-            return true;
-        }
+        if (!preg_match('/^09\d{9}$/', $phone)) return true;
 
-        // Block repeated digits
-        if (preg_match('/^(.)\1{10}$/', $phone)) {
-            return true;
-        }
+        if (preg_match('/^(.)\1{10}$/', $phone)) return true;
 
         return false;
     }
 
-    // ---------------- APPLY VALIDATIONS ----------------
-
     if (isSuspiciousEmail($emailAddress, $blockedEmailUsernames, $blockedDomains)) {
-        $_SESSION['highschool_apply_error'] = "Please use a valid email address. Disposable or suspicious emails are not allowed.";
-        header("Location: highschoolapply.php");
+        $_SESSION['highschool_apply_error'] = "Please use a valid email address.";
+        header("Location: index.php");
         exit();
     }
 
     if (isSuspiciousPhone($phoneNumber)) {
         $_SESSION['highschool_apply_error'] = "Please enter a valid 11-digit mobile number starting with 09.";
-        header("Location: highschoolapply.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -121,9 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkSchedule->store_result();
 
     if ($checkSchedule->num_rows > 0) {
-        $_SESSION['highschool_apply_error'] = "This email is already used for an application.";
+        $_SESSION['highschool_apply_error'] = "This email is already used.";
         $checkSchedule->close();
-        header("Location: highschoolapply.php");
+        header("Location: index.php");
         exit();
     }
     $checkSchedule->close();
@@ -134,14 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkAccount->store_result();
 
     if ($checkAccount->num_rows > 0) {
-        $_SESSION['highschool_apply_error'] = "This email is already registered as a high school account.";
+        $_SESSION['highschool_apply_error'] = "This email is already registered.";
         $checkAccount->close();
-        header("Location: highschoolapply.php");
+        header("Location: index.php");
         exit();
     }
     $checkAccount->close();
 
-    // ---------------- INSERT APPLICATION ----------------
+    // ---------------- INSERT ----------------
     $stmt = $conn->prepare("INSERT INTO highschool_schedule 
         (firstName, middleName, lastName, school, strand, yearLevel, address, phoneNumber, emailAddress) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -160,15 +127,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if ($stmt->execute()) {
+
         $_SESSION['highschool_apply_success'] = "Your application has been submitted successfully!";
+
+        // ---------------- CHECK LIMIT ----------------
+        $deadlineFile = __DIR__ . '/kceap_admin/deadline.json';
+
+        if (file_exists($deadlineFile)) {
+
+            $settings = json_decode(file_get_contents($deadlineFile), true);
+            $hsLimit = $settings['highschool']['limit'] ?? 0;
+
+            if ($hsLimit > 0) {
+
+                $countResult = $conn->query("SELECT COUNT(*) AS total FROM highschool_schedule");
+                $currentCount = $countResult->fetch_assoc()['total'];
+
+                if ($currentCount >= $hsLimit) {
+                    $_SESSION['limit_reached'] = 'highschool';
+                    $_SESSION['highschool_apply_success'] =
+                        "Your application has been submitted successfully! High school limit has now been reached.";
+                }
+            }
+        }
+
+        $stmt->close();
+        $conn->close();
+
+        header("Location: index.php");
+        exit();
+
     } else {
+
         $_SESSION['highschool_apply_error'] = "There was an error submitting your application.";
+
+        $stmt->close();
+        $conn->close();
+
+        header("Location: index.php");
+        exit();
     }
-
-    $stmt->close();
-    $conn->close();
-
-    header("Location: highschoolapply.php");
-    exit();
 }
 ?>
