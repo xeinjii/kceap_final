@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: ../index.php");
     exit();
 }
-
+$admin_id = $_SESSION['admin_id'];
 // Fetch all applicants from the college_schedule table
 $sql = "SELECT * FROM college_schedule ORDER BY id DESC";
 $result = $conn->query($sql);

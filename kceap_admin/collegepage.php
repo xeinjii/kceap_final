@@ -8,6 +8,7 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit();
 }
+$admin_id = $_SESSION['admin_id'];
 ?>
 
 <body>

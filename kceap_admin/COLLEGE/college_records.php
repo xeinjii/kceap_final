@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: ../index.php");
     exit();
 }
-
+$admin_id = $_SESSION['admin_id'];
 // Fetch all college accounts with active status only
 $sql = "SELECT * FROM college_account WHERE status = 'active' ORDER BY applicant_id ASC";
 $result = $conn->query($sql);

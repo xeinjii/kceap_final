@@ -6,6 +6,40 @@ if (!isset($_SESSION['admin_id'])) {
     header('Location: ../index.php');
     exit();
 }
+$admin_id = $_SESSION['admin_id'];
+
+// Delete all expired highschool applicants
+$delete_message = '';
+if (isset($_POST['delete_all_expired'])) {
+    $expired_query = $conn->query("SELECT id, email FROM highschool_account WHERE status = 'expired'");
+    $deleted_count = 0;
+    $email_failed_count = 0;
+    $email_success_count = 0;
+    if ($expired_query && $expired_query->num_rows > 0) {
+        require_once '../../config/config.php';
+        while ($row = $expired_query->fetch_assoc()) {
+            $del_stmt = $conn->prepare("DELETE FROM highschool_account WHERE id = ?");
+            $del_stmt->bind_param('i', $row['id']);
+            if ($del_stmt->execute()) {
+                $deleted_count++;
+                $mail = getMailer();
+                $mail->addAddress($row['email']);
+                $mail->Subject = 'KCEAP Account Removal Notification';
+                $mail->Body = "Dear Applicant,\n\nYour KCEAP account has been permanently removed from our system due to inactivity or failure to submit/renew your application within the specified deadline.\n\nIf you believe this is an error or wish to reapply, please contact our support team.\n\nBest regards,\nKCEAP Administration";
+                $mail->isHTML(false);
+                try {
+                    $mail->send();
+                    $email_success_count++;
+                } catch (Exception $e) {
+                    $email_failed_count++;
+                }
+            }
+        }
+        $delete_message = '<div class="alert alert-success">Deleted ' . $deleted_count . ' expired applicants. Email sent: ' . $email_success_count . ', failed: ' . $email_failed_count . '.</div>';
+    } else {
+        $delete_message = '<div class="alert alert-warning">No expired applicants to delete.</div>';
+    }
+}
 
 // Fetch expired highschool applicants
 $sql = "SELECT * FROM highschool_account WHERE status = 'expired' ORDER BY upload_deadline DESC";
@@ -56,7 +90,29 @@ $result = $conn->query($sql);
                         <span class="material-symbols-outlined align-middle me-1 text-danger">report_problem</span>
                         Expired Applicants
                     </h3>
+                    <button type="button" class="btn btn-danger btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#deleteAllModal">Delete All</button>
                 </div>
+                <?= $delete_message ?>
+        <!-- Delete All Modal -->
+        <div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteAllModalLabel">Confirm Delete All</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to permanently delete all expired applicants? This action cannot be undone and will notify all affected users by email.
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="delete_all_expired" class="btn btn-danger">Delete All</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
                 <div class="table-responsive scroll-area">
                     <table class="table table-bordered table-hover table-striped align-middle">

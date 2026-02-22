@@ -8,6 +8,7 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
+$admin_id = $_SESSION['admin_id'];
 // File path
 $deadlineFile = __DIR__ . '/deadline.json';
 

@@ -7,7 +7,7 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit();
 }
-
+$admin_id = $_SESSION['admin_id'];
 // Get the admin fullname from session
 $adminName = $_SESSION['admin_name'];
 ?>

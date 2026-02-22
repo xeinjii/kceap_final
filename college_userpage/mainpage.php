@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id'])) {
   exit();
 }
 
+
 // Handle AJAX request for user info refresh
 if (isset($_GET['action']) && $_GET['action'] === 'refresh_user_info') {
   $email = $_SESSION['email'] ?? null;
@@ -290,10 +291,6 @@ if (!empty($userEmail)) {
             <div class="col-md-6 mb-3">
               <small class="text-muted">Phone Number</small>
               <p class="mb-0 fw-semibold" id="user_phone"><?= htmlspecialchars($_SESSION['phone_number'] ?? 'N/A') ?></p>
-            </div>
-            <div class="col-md-6 mb-3">
-              <small class="text-muted">Status</small>
-              <p class="mb-0"><span id="user_status_badge" class="badge bg-info"><?= htmlspecialchars($_SESSION['status'] ?? 'Active') ?></span></p>
             </div>
             <div class="col-md-6 mb-3">
               <small class="text-muted">Upload Deadline</small>

@@ -1,8 +1,15 @@
 <?php
 session_start();
 require_once '../config/config.php';
+// Detect AJAX check
+$isAjax = isset($_GET['action']) && $_GET['action'] === 'check_deadline';
 
 if (!isset($_SESSION['user_id'])) {
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'not_authenticated']);
+        exit();
+    }
     header('Location: login.php');
     exit();
 }
@@ -10,7 +17,8 @@ if (!isset($_SESSION['user_id'])) {
 $email = $_SESSION['email'] ?? null;
 
 // Handle AJAX request for real-time check
-if (isset($_GET['action']) && $_GET['action'] === 'check_deadline' && $email) {
+if ($isAjax && $email) {
+    header('Content-Type: application/json');
     date_default_timezone_set('Asia/Manila');
     $now = new DateTimeImmutable('now');
 
@@ -42,7 +50,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_deadline' && $email) {
         }
 
         if ($deadline instanceof DateTimeImmutable) {
-            if ($now > $deadline && strtolower(trim($status)) !== 'expired') {
+            if ($now > $deadline && strtolower(trim((string)$status)) !== 'expired') {
                 // Update status in DB
                 $upd = $conn->prepare("UPDATE highschool_account SET status='expired' WHERE email=?");
                 if ($upd) {
@@ -242,20 +250,27 @@ body {
 <script>
 // Real-time deadline check every 30 seconds
 function checkDeadline() {
-    $.getJSON('schedule.php?action=check_deadline', function(data) {
-        if(data.status === 'success') {
-            const statusElem = $('#status');
-            const deadlineElem = $('#upload_deadline');
+    $.getJSON('schedule.php?action=check_deadline')
+        .done(function(data) {
+            if (data.status === 'success') {
+                const statusElem = $('#status');
+                const deadlineElem = $('#upload_deadline');
 
-            if(data.expired) {
-                statusElem.text(data.current_status).removeClass('status-active').addClass('status-expired');
-                deadlineElem.addClass('status-expired');
-            } else {
-                statusElem.text(data.current_status).removeClass('status-expired').addClass('status-active');
-                deadlineElem.removeClass('status-expired').addClass('status-active');
+                if (data.expired) {
+                    statusElem.text(data.current_status).removeClass('status-active').addClass('status-expired');
+                    deadlineElem.addClass('status-expired');
+                } else {
+                    statusElem.text(data.current_status).removeClass('status-expired').addClass('status-active');
+                    deadlineElem.removeClass('status-expired').addClass('status-active');
+                }
+            } else if (data.status === 'error' && data.message === 'not_authenticated') {
+                // If session expired, reload to redirect to login
+                window.location.reload();
             }
-        }
-    });
+        })
+        .fail(function() {
+            // ignore network or parse errors
+        });
 }
 
 // Check immediately and every 30 seconds

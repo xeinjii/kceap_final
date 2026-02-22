@@ -152,7 +152,9 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
 
         .text-gradient {
             background: linear-gradient(45deg, #ffffff, #cfe2ff);
+            background-clip: text;
             -webkit-background-clip: text;
+            color: transparent;
             -webkit-text-fill-color: transparent;
         }
 
@@ -510,7 +512,54 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
         [data-animate-delay="6"] {
             animation-delay: 0.6s;
         }
+
+        /* Back to top arrow only */
+        #backToTop {
+            display: none;
+            position: fixed;
+            right: 28px;
+            top: calc(56px + 12px);
+            z-index: 1080;
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            width: auto;
+            height: auto;
+        }
+
+        #backToTop .material-symbols-outlined {
+            font-size: 38px;
+            color: #0d6efd;
+            background: none;
+            border-radius: 0;
+            display: inline-block;
+            transition: color 0.2s;
+        }
+
+        #backToTop:hover .material-symbols-outlined {
+            color: #6610f2;
+        }
+
+        #backToTop.show {
+            display: block !important;
+            animation: backToTopFade 240ms ease-in-out;
+        }
+
+        @keyframes backToTopFade {
+            from {
+                transform: translateY(8px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
+
+
 
 </head>
 
@@ -642,6 +691,7 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                         <a class="nav-link" href="#eligibility">Eligibility</a>
                     </li>
                     <li class="nav-item">
+
                         <a class="nav-link" href="announcement.php">Announcement</a>
                     </li>
                 </ul>
@@ -649,6 +699,26 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
 
         </div>
     </nav>
+
+    <!-- Back to top button (appears under navbar when footer visible) -->
+    <button id="backToTop" aria-label="Back to top">
+        <span class="material-symbols-outlined"
+            style="font-size: 60px; animation: bounce 2s infinite; color: white;">arrow_upward</span>
+    </button>
+
+    <style>
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
 
 
 
@@ -915,44 +985,45 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
     </div>
 
     <!-- How It Works Section -->
-<section class="py-5 bg-light" id="how-it-works">
-    <div class="container">
-        <div class="text-center mb-5" data-animate="fadeInUp">
-            <h2 class="section-title">How It Works</h2>
-            <p class="section-subtitle">A simple 4-step process to apply for a scholarship</p>
+    <section class="py-5 bg-light" id="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5" data-animate="fadeInUp">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">A simple 4-step process to apply for a scholarship</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="1">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <span class="material-symbols-outlined text-primary fs-1">event</span>
+                        <h5 class="mt-3">Set Schedule</h5>
+                        <p class="small">Schedule your preferred date and time for taking the scholarship examination.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="2">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <span class="material-symbols-outlined text-primary fs-1">description</span>
+                        <h5 class="mt-3">Submit Application</h5>
+                        <p class="small">Fill out the scholarship form and upload required documents.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="3">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <span class="material-symbols-outlined text-primary fs-1">hourglass_top</span>
+                        <h5 class="mt-3">Wait for Review</h5>
+                        <p class="small">Your application will be reviewed by the admin team.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="4">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <span class="material-symbols-outlined text-primary fs-1">check_circle</span>
+                        <h5 class="mt-3">Receive Decision</h5>
+                        <p class="small">Get notified about your application status via email.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="row g-4">
-            <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="1">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <span class="material-symbols-outlined text-primary fs-1">event</span>
-                    <h5 class="mt-3">Set Schedule</h5>
-                    <p class="small">Schedule your preferred date and time for taking the scholarship examination.</p>
-                </div>
-            </div>
-            <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="2">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <span class="material-symbols-outlined text-primary fs-1">description</span>
-                    <h5 class="mt-3">Submit Application</h5>
-                    <p class="small">Fill out the scholarship form and upload required documents.</p>
-                </div>
-            </div>
-            <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="3">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <span class="material-symbols-outlined text-primary fs-1">hourglass_top</span>
-                    <h5 class="mt-3">Wait for Review</h5>
-                    <p class="small">Your application will be reviewed by the admin team.</p>
-                </div>
-            </div>
-            <div class="col-md-3 text-center" data-animate="fadeInUp" data-animate-delay="4">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <span class="material-symbols-outlined text-primary fs-1">check_circle</span>
-                    <h5 class="mt-3">Receive Decision</h5>
-                    <p class="small">Get notified about your application status via email.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
 
     <!-- Eligibility Criteria -->
     <section class="py-5" id="eligibility">
@@ -998,6 +1069,64 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                         <span class="material-symbols-outlined text-primary me-3">task_alt</span>
                         <div>
                             <p class="mb-0">Presently not enjoying any other government-funded scholarship grant</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light" id="termination-appeal" data-animate="fadeInUp">
+        <div class="container">
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-8 text-center">
+                    <h2 class="fw-bold mb-3 text-danger animate-fadeInUp">
+                        <span class="material-symbols-outlined align-middle me-2" style="font-size:2.2rem;vertical-align:middle;">gavel</span>
+                        Termination of Grant &amp; Appeal Process
+                    </h2>
+                    <p class="lead animate-fadeInUp" style="animation-delay:0.1s;">
+                        The Scholarship Office shall determine if a scholar has violated the conditions of the scholarship agreement or any of the grounds for termination, as provided below upon approval of the board.
+                    </p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 animate-fadeInLeft" style="animation-delay:0.2s;">
+                    <div class="card border-danger shadow h-100">
+                        <div class="card-header bg-danger text-white">
+                            <span class="material-symbols-outlined align-middle me-1">report</span>
+                            Grounds for Termination
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">cancel</span>Non-compliance of the scholarship requirements, terms and condition of the program, or policies of the office after due notice</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">school</span>Academic Deficiencies</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">block</span>Expulsion or dismissal from the academic institution</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">edit_off</span>Forging or falsification of official grades or records</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">info</span>Giving false information necessary to the selection process during interview</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">contact_emergency</span>Abandonment of scholarship and/or non-communication with the KCEAP Office despite efforts exerted by said office to communicate</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">gavel</span>Engaged or involved in illegal activities</li>
+                                <li class="mb-2"><span class="material-symbols-outlined text-danger me-2 align-middle">gavel</span>Conviction of an offense under the Revised Penal Code or Special Penal Law</li>
+                                <li><span class="material-symbols-outlined text-danger me-2 align-middle">more_horiz</span>Other causes as may be determined by the board</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 animate-fadeInRight" style="animation-delay:0.3s;">
+                    <div class="card border-primary shadow h-100">
+                        <div class="card-header bg-primary text-white">
+                            <span class="material-symbols-outlined align-middle me-1">how_to_vote</span>
+                            Appeal Process
+                        </div>
+                        <div class="card-body">
+                            <ol class="mb-2">
+                                <li>The Scholar may appeal the termination of the scholarship grants within <strong>ten (10) calendar days</strong> from notice of termination. In case of a minor, the parent or guardian may appeal on the scholar's behalf.</li>
+                                <li>The appellant may appeal the termination of the scholarship grant in writing, stating the name of the student, date of termination, reason or ground for the termination, and the reason why the appellant believes that termination was wrongful or unfair. The letter shall be addressed to the Scholarship Board and shall be submitted through the scholarship office.</li>
+                                <li>Decision of the appeal will be out within <strong>twenty (20) working days</strong>. A copy of the Board's decision shall be furnished to the Appellant through the Scholarship Office.</li>
+                            </ol>
+                            <div class="alert alert-info mt-3 animate-fadeInScale" style="animation-delay:0.4s;">
+                                <span class="material-symbols-outlined align-middle me-1">info</span>
+                                For assistance with appeals, please contact the Scholarship Office.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1065,8 +1194,8 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                             <img src="img/d3.jpg" alt="developer 3" class="rounded-circle" width="30" height="30">
                         </a>
                         <a href="#" data-bs-toggle="modal" data-bs-target="#devModal" data-name="Mercy Ann Cabunag"
-                            data-role="Documentation II" data-img="img/d4.jpg">
-                            <img src="img/d4.jpg" alt="developer 4" class="rounded-circle" width="30" height="30">
+                            data-role="Documentation II" data-img="img/d4.jpeg">
+                            <img src="img/d4.jpeg" alt="developer 4" class="rounded-circle" width="30" height="30">
                         </a>
                     </div>
                 </div>
@@ -1287,6 +1416,40 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
 
         // Check every 5 seconds (adjust if needed)
         setInterval(updateStatus, 5000);
+    </script>
+
+    <script>
+        // Show back-to-top button when footer enters the viewport
+        (function () {
+            const backBtn = document.getElementById('backToTop');
+            const footer = document.querySelector('footer');
+
+            if (!backBtn || !footer) return;
+
+            // IntersectionObserver to detect footer visibility
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        backBtn.classList.add('show');
+                    } else {
+                        backBtn.classList.remove('show');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            observer.observe(footer);
+
+            // Smooth scroll to hero section (#home)
+            backBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const hero = document.getElementById('home');
+                if (hero) {
+                    hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        })();
     </script>
 
 </body>

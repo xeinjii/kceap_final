@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: ../index.php");
     exit();
 }
-
+$admin_id = $_SESSION['admin_id'];
 // Fetch active high school records only
 $sql = "SELECT * FROM highschool_account WHERE status = 'active' ORDER BY id DESC";
 $result = $conn->query($sql);

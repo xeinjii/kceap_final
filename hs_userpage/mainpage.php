@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
   header('Location: login.php');
   exit();
 }
-
+$admin_id = $_SESSION['admin_id'];
 // Handle AJAX request for user info refresh
 if (isset($_GET['action']) && $_GET['action'] === 'refresh_user_info') {
   $email = $_SESSION['email'] ?? null;
