@@ -10,6 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Optional: read deadline date (admin supplies date only). Time will default to 23:59:00.
+$upload_deadline = null;
+if (!empty($_POST['upload_deadline_date'])) {
+    $date = $_POST['upload_deadline_date'];
+    // Normalize and append end-of-day time
+    $upload_deadline = $date . ' 23:59:00';
+}
+
 /* ======================================================
    1️⃣ GRADUATE 4TH YEAR - 2ND SEMESTER STUDENTS
 ====================================================== */
@@ -142,9 +150,21 @@ if ($archive_result && $archive_result->num_rows > 0) {
    3️⃣ RESET REMAINING STUDENTS (DO NOT CHANGE YEAR LEVEL)
 ====================================================== */
 
-$reset_sql = "UPDATE college_account SET status = 'pending'";
+// Update statuses to pending; if admin provided a date, set upload_deadline to that date at 23:59:00
+if ($upload_deadline) {
+    $reset_stmt = $conn->prepare("UPDATE college_account SET status = 'pending', upload_deadline = ?");
+    if ($reset_stmt) {
+        $reset_stmt->bind_param('s', $upload_deadline);
+        $reset_ok = $reset_stmt->execute();
+        $reset_stmt->close();
+    } else {
+        $reset_ok = false;
+    }
+} else {
+    $reset_ok = ($conn->query("UPDATE college_account SET status = 'pending'") === TRUE);
+}
 
-if ($conn->query($reset_sql) === TRUE) {
+if ($reset_ok === TRUE || $reset_ok === 1) {
 
     $sent = 0;
     $failed = 0;
@@ -166,13 +186,24 @@ if ($conn->query($reset_sql) === TRUE) {
             try {
                 $mail = getMailer();
                 $mail->addAddress($toEmail, $toName);
+                // Include deadline text if admin supplied a date
+                $deadline_text = '';
+                if (!empty($upload_deadline)) {
+                    try {
+                        $dt = new DateTime($upload_deadline);
+                        $deadline_text = '<p><strong>Upload Deadline:</strong> ' . $dt->format('F j, Y \a\t g:i A') . '</p>';
+                    } catch (Exception $ex) {
+                        $deadline_text = '<p><strong>Upload Deadline:</strong> ' . htmlspecialchars($upload_deadline) . '</p>';
+                    }
+                }
+
                 $mail->Subject = 'KCEAP - Account Status Reset';
-                $mail->Body = "
-                    Dear " . htmlspecialchars($row['first_name']) . ",<br><br>
-                    Your scholar status has been reset and your renewal is now pending.
-                    Please log in to your account to complete required steps.<br><br>
-                    Thank you,<br>KCEAP Team
-                ";
+                $mail->Body = "Dear " . htmlspecialchars($row['first_name']) . ",<br><br>" .
+                              "Your scholar status has been reset and your renewal is now pending.<br>" .
+                              ( $deadline_text ? ("Please upload your documents before the deadline below.<br>") : "" ) .
+                              $deadline_text .
+                              "<br>Please log in to your account to complete required steps.<br><br>" .
+                              "Thank you,<br>KCEAP Team";
                 $mail->isHTML(true);
                 $mail->send();
                 $sent++;
@@ -206,6 +237,8 @@ if ($conn->query($reset_sql) === TRUE) {
     if ($failed > 0) {
         $msg .= " $failed renewal notification(s) failed.";
     }
+
+    // no upload_deadline info
 
     $_SESSION['message'] = $msg;
     $_SESSION['message_type'] = ($failed > 0 || $graduate_failed > 0) ? 'warning' : 'success';

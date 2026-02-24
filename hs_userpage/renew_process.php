@@ -77,6 +77,15 @@ if (!empty($_FILES['renewal_documents']['name'][0])) {
         }
     }
     if ($success_count > 0) {
+        // Clear upload deadline if at least one file uploaded
+        $account_id = $_SESSION['id'] ?? null;
+        if ($account_id) {
+            $upd = $conn->prepare("UPDATE highschool_account SET upload_deadline = NULL WHERE id = ?");
+            $upd->bind_param("i", $account_id);
+            $upd->execute();
+            $upd->close();
+        }
+
         $_SESSION['message'] = "$success_count file(s) uploaded successfully.";
         $_SESSION['message_type'] = 'success';
     }

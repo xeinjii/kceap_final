@@ -7,8 +7,8 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-// Fetch all high school records
-$sql = "SELECT * FROM highschool_account ORDER BY id DESC";
+// Fetch active high school records only
+$sql = "SELECT * FROM highschool_account WHERE status = 'active' ORDER BY id DESC";
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -545,6 +545,18 @@ $result = $conn->query($sql);
                     <p>Are you sure you want to reset <strong>all applicant statuses</strong> to
                         <strong>pending</strong>? This action cannot be undone.
                     </p>
+
+                    <!-- Optional Upload Deadline -->
+                    <div class="alert alert-info mt-3">
+                        <strong>Optional:</strong> Set an upload deadline for all applicants
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Upload Deadline Date (Optional)</label>
+                        <input type="date" name="expire_date" class="form-control" 
+                               min="<?php echo date('Y-m-d'); ?>">
+                        <small class="form-text text-muted">Leave blank to skip deadline. Date will default to 23:59 as submission time.</small>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

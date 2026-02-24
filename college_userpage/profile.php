@@ -7,45 +7,71 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-
-// Determine account status: prefer session value, otherwise query DB by email
-$status = $_SESSION['status'] ?? '';
-if (empty($status)) {
-  $email = $_SESSION['email'] ?? null;
-  if ($email) {
-    $stmt = $conn->prepare("SELECT status FROM college_account WHERE email = ? LIMIT 1");
-    if ($stmt) {
-      $stmt->bind_param('s', $email);
-      $stmt->execute();
-      $stmt->bind_result($db_status);
-      if ($stmt->fetch()) {
-        $status = $db_status;
-      }
-      $stmt->close();
-    }
-  }
-}
-
-$display_status = $status ? htmlspecialchars($status) : 'N/A';
-
-// Determine semester: prefer session value, otherwise query DB by email
-$semester = $_SESSION['semester'] ?? '';
-if (empty($semester)) {
+// Handle AJAX request for profile info refresh
+if (isset($_GET['action']) && $_GET['action'] === 'refresh_profile_info') {
+    header('Content-Type: application/json');
     $email = $_SESSION['email'] ?? null;
     if ($email) {
-        $stmt = $conn->prepare("SELECT semester FROM college_account WHERE email = ? LIMIT 1");
+        $stmt = $conn->prepare("SELECT status, semester FROM college_account WHERE email = ? LIMIT 1");
         if ($stmt) {
             $stmt->bind_param('s', $email);
             $stmt->execute();
-            $stmt->bind_result($db_semester);
+            $stmt->bind_result($db_status, $db_semester);
             if ($stmt->fetch()) {
-                $semester = $db_semester;
+                echo json_encode([
+                    'status' => 'success',
+                    'account_status' => $db_status ?? 'N/A',
+                    'semester' => $db_semester ?? 'N/A'
+                ]);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'User not found']);
             }
             $stmt->close();
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Database error']);
         }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    }
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+$email = $_SESSION['email'] ?? null;
+
+// Fetch fresh data from database on every page load to get latest updates
+$first_name = $_SESSION['first_name'] ?? '';
+$middle_name = $_SESSION['middle_name'] ?? '';
+$last_name = $_SESSION['last_name'] ?? '';
+$course = $_SESSION['course'] ?? '';
+$year_level = $_SESSION['year_level'] ?? '';
+$address = $_SESSION['address'] ?? '';
+$phone_number = $_SESSION['phone_number'] ?? '';
+$status = '';
+$semester = '';
+
+if ($email) {
+    $stmt = $conn->prepare("SELECT first_name, middle_name, last_name, course, year_level, address, phone_number, status, semester FROM college_account WHERE email = ? LIMIT 1");
+    if ($stmt) {
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $stmt->bind_result($db_first, $db_middle, $db_last, $db_course, $db_year, $db_address, $db_phone, $db_status, $db_semester);
+        if ($stmt->fetch()) {
+            $first_name = $db_first;
+            $middle_name = $db_middle;
+            $last_name = $db_last;
+            $course = $db_course;
+            $year_level = $db_year;
+            $address = $db_address;
+            $phone_number = $db_phone;
+            $status = $db_status;
+            $semester = $db_semester;
+        }
+        $stmt->close();
     }
 }
+
+$display_status = $status ? htmlspecialchars($status) : 'N/A';
 $display_semester = $semester ? htmlspecialchars($semester) : 'N/A';
 ?>
 <!DOCTYPE html>
@@ -139,23 +165,23 @@ body {
   <h3 class="text-center mb-4 fw-semibold">👤 Student Profile</h3>
   <div class="row g-3">
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">badge</span>First Name</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['first_name']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($first_name); ?></p></div>
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">person</span>Middle Name</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['middle_name']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($middle_name); ?></p></div>
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">face</span>Last Name</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['last_name']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($last_name); ?></p></div>
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">mail</span>Email</p>
       <p class="field-value"><?php echo htmlspecialchars($_SESSION['email']); ?></p></div>
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">school</span>Course</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['course']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($course); ?></p></div>
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">calendar_month</span>Year Level</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['year_level']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($year_level); ?></p></div>
     <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">menu_book</span>Semester</p>
       <p class="field-value"><?php echo $display_semester; ?></p></div>
     <div class="col-12"><p class="field-label"><span class="material-symbols-outlined field-icon">home</span>Address</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['address']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($address); ?></p></div>
     <div class="col-12"><p class="field-label"><span class="material-symbols-outlined field-icon">call</span>Phone</p>
-      <p class="field-value"><?php echo htmlspecialchars($_SESSION['phone_number']); ?></p></div>
+      <p class="field-value"><?php echo htmlspecialchars($phone_number); ?></p></div>
     <div class="col-12"><p class="field-label"><span class="material-symbols-outlined field-icon">info</span>Status</p>
       <p class="field-value"><?php echo $display_status; ?></p></div>
   </div>

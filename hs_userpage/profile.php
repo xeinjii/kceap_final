@@ -7,6 +7,26 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Handle AJAX request for user info refresh
+if (isset($_GET['action']) && $_GET['action'] === 'refresh_profile_info') {
+  $email = $_SESSION['email'] ?? null;
+  if ($email) {
+    $stmt = $conn->prepare("SELECT status, semester FROM highschool_account WHERE email = ? LIMIT 1");
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $stmt->bind_result($st, $sm);
+    if ($stmt->fetch()) {
+      echo json_encode([
+        'status' => 'success',
+        'account_status' => $st,
+        'semester' => $sm
+      ]);
+    }
+    $stmt->close();
+  }
+  exit();
+}
+
 $user_id = $_SESSION['user_id'];
 
 // Determine account status: prefer session value, otherwise query DB by email
@@ -148,13 +168,13 @@ body {
         <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">calendar_month</span>Year Level</p>
             <p class="field-value"><?php echo htmlspecialchars($_SESSION['year_level']); ?></p></div>
         <div class="col-md-6"><p class="field-label"><span class="material-symbols-outlined field-icon">menu_book</span>Semester</p>
-            <p class="field-value"><?php echo $display_semester; ?></p></div>
+            <p class="field-value" id="profile_semester"><?php echo $display_semester; ?></p></div>
         <div class="col-12"><p class="field-label"><span class="material-symbols-outlined field-icon">home</span>Address</p>
             <p class="field-value"><?php echo htmlspecialchars($_SESSION['address']); ?></p></div>
         <div class="col-12"><p class="field-label"><span class="material-symbols-outlined field-icon">call</span>Phone</p>
             <p class="field-value"><?php echo htmlspecialchars($_SESSION['phone_number']); ?></p></div>
         <div class="col-12"><p class="field-label"><span class="material-symbols-outlined field-icon">info</span>Status</p>
-            <p class="field-value"><?php echo $display_status; ?></p></div>
+            <p class="field-value" id="profile_status"><?php echo $display_status; ?></p></div>
     </div>
 
     <hr class="my-4">
@@ -202,6 +222,37 @@ body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Poll for latest profile information (status and semester changes by admin)
+async function pollProfileInfo() {
+  try {
+    const res = await fetch('profile.php?action=refresh_profile_info', {cache: 'no-store'});
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.status !== 'success') return;
+
+    // Update status
+    const statusElem = document.getElementById('profile_status');
+    if (statusElem && data.account_status) {
+      statusElem.textContent = data.account_status;
+    }
+
+    // Update semester
+    const semesterElem = document.getElementById('profile_semester');
+    if (semesterElem && data.semester) {
+      semesterElem.textContent = data.semester;
+    }
+  } catch (e) {
+    // ignore network errors
+  }
+}
+
+// Run once on load and then every 30 seconds
+document.addEventListener('DOMContentLoaded', function() {
+  pollProfileInfo();
+  setInterval(pollProfileInfo, 30000);
+});
+</script>
 </body>
 </html>
        

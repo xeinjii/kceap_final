@@ -7,6 +7,32 @@ if (!isset($_SESSION['user_id'])) {
   exit();
 }
 
+// Handle AJAX request for user info refresh
+if (isset($_GET['action']) && $_GET['action'] === 'refresh_user_info') {
+  $email = $_SESSION['email'] ?? null;
+  if ($email) {
+    $stmt = $conn->prepare("SELECT first_name, middle_name, last_name, school, year_level, phone_number, status, upload_deadline FROM highschool_account WHERE email = ? LIMIT 1");
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $stmt->bind_result($fn, $mn, $ln, $sc, $yl, $pn, $st, $ud);
+    if ($stmt->fetch()) {
+      echo json_encode([
+        'status' => 'success',
+        'first_name' => $fn,
+        'middle_name' => $mn,
+        'last_name' => $ln,
+        'school' => $sc,
+        'year_level' => $yl,
+        'phone_number' => $pn,
+        'account_status' => $st,
+        'upload_deadline' => $ud
+      ]);
+    }
+    $stmt->close();
+  }
+  exit();
+}
+
 // Check if welcome message should be shown (only on first visit after login)
 $show_welcome = $_SESSION['show_welcome'] ?? false;
 if ($show_welcome) {
@@ -15,6 +41,23 @@ if ($show_welcome) {
 
 // Get user email for display
 $userEmail = $_SESSION['email'] ?? '';
+
+// Fetch user's upload deadline and status for display
+$upload_deadline = null;
+$status = '';
+if (!empty($userEmail)) {
+  $stmt = $conn->prepare("SELECT upload_deadline, status FROM highschool_account WHERE email = ? LIMIT 1");
+  if ($stmt) {
+    $stmt->bind_param('s', $userEmail);
+    $stmt->execute();
+    $stmt->bind_result($ud, $st);
+    if ($stmt->fetch()) {
+      $upload_deadline = $ud;
+      $status = $st;
+    }
+    $stmt->close();
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -227,7 +270,7 @@ $userEmail = $_SESSION['email'] ?? '';
           <div class="row text-start">
             <div class="col-md-6 mb-3">
               <small class="text-muted">Full Name</small>
-              <p class="mb-0 fw-semibold"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['middle_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></p>
+              <p class="mb-0 fw-semibold" id="user_full_name"><?= htmlspecialchars(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['middle_name'] ?? '') . ' ' . ($_SESSION['last_name'] ?? '')) ?></p>
             </div>
             <div class="col-md-6 mb-3">
               <small class="text-muted">Email</small>
@@ -235,19 +278,23 @@ $userEmail = $_SESSION['email'] ?? '';
             </div>
             <div class="col-md-6 mb-3">
               <small class="text-muted">School</small>
-              <p class="mb-0 fw-semibold"><?= htmlspecialchars($_SESSION['school'] ?? 'N/A') ?></p>
+              <p class="mb-0 fw-semibold" id="user_school"><?= htmlspecialchars($_SESSION['school'] ?? 'N/A') ?></p>
             </div>
             <div class="col-md-6 mb-3">
               <small class="text-muted">Year Level</small>
-              <p class="mb-0 fw-semibold"><?= htmlspecialchars($_SESSION['year_level'] ?? 'N/A') ?></p>
+              <p class="mb-0 fw-semibold" id="user_year_level"><?= htmlspecialchars($_SESSION['year_level'] ?? 'N/A') ?></p>
             </div>
             <div class="col-md-6 mb-3">
               <small class="text-muted">Phone Number</small>
-              <p class="mb-0 fw-semibold"><?= htmlspecialchars($_SESSION['phone_number'] ?? 'N/A') ?></p>
+              <p class="mb-0 fw-semibold" id="user_phone"><?= htmlspecialchars($_SESSION['phone_number'] ?? 'N/A') ?></p>
             </div>
             <div class="col-md-6 mb-3">
               <small class="text-muted">Status</small>
-              <p class="mb-0"><span class="badge bg-info"><?= htmlspecialchars($_SESSION['status'] ?? 'Active') ?></span></p>
+              <p class="mb-0"><span id="user_status_badge" class="badge bg-info"><?= htmlspecialchars($_SESSION['status'] ?? 'Active') ?></span></p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <small class="text-muted">Upload Deadline</small>
+              <p class="mb-0"><span id="upload_deadline_badge" class="fw-semibold"><?= $upload_deadline ? htmlspecialchars(date('F j, Y \a\t g:i A', strtotime($upload_deadline))) : 'No deadline set' ?></span></p>
             </div>
           </div>
         </div>
@@ -376,6 +423,80 @@ $userEmail = $_SESSION['email'] ?? '';
       link.setAttribute('href', '#');
     });
   </script>
+
+    <script>
+    // Poll for latest user information (status, deadline, and profile changes by admin)
+    async function pollUserInfo() {
+      try {
+        const res = await fetch('mainpage.php?action=refresh_user_info', {cache: 'no-store'});
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status !== 'success') return;
+
+        // Update full name
+        const fullNameElem = document.getElementById('user_full_name');
+        if (fullNameElem && data.first_name) {
+          fullNameElem.textContent = (data.first_name + ' ' + (data.middle_name || '') + ' ' + (data.last_name || '')).trim();
+        }
+
+        // Update school
+        const schoolElem = document.getElementById('user_school');
+        if (schoolElem) {
+          schoolElem.textContent = data.school || 'N/A';
+        }
+
+        // Update year level
+        const yearElem = document.getElementById('user_year_level');
+        if (yearElem) {
+          yearElem.textContent = data.year_level || 'N/A';
+        }
+
+        // Update phone
+        const phoneElem = document.getElementById('user_phone');
+        if (phoneElem) {
+          phoneElem.textContent = data.phone_number || 'N/A';
+        }
+
+        // Update status badge
+        const statusBadge = document.getElementById('user_status_badge');
+        if (statusBadge && data.account_status) {
+          statusBadge.textContent = data.account_status;
+          if (data.account_status.toLowerCase() === 'expired') {
+            statusBadge.classList.remove('bg-info');
+            statusBadge.classList.add('bg-danger');
+          } else {
+            statusBadge.classList.remove('bg-danger');
+            statusBadge.classList.add('bg-info');
+          }
+        }
+
+        // Update deadline
+        const dlElem = document.getElementById('upload_deadline_badge');
+        if (dlElem) {
+          const dl = data.upload_deadline;
+          if (!dl) {
+            dlElem.textContent = 'No deadline set';
+          } else {
+            const parsed = new Date(dl);
+            if (!isNaN(parsed.getTime())) {
+              const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+              dlElem.textContent = parsed.toLocaleString('en-US', options);
+            } else {
+              dlElem.textContent = dl;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore network errors
+      }
+    }
+
+    // Run once on load and then every 30 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+      pollUserInfo();
+      setInterval(pollUserInfo, 30000);
+    });
+    </script>
 
      <script>
         history.pushState(null, null, location.href);

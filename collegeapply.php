@@ -121,7 +121,7 @@ if (file_exists($jsonPath)) {
                     </div>
                     <div class="col-12 col-md-6">
                         <label for="middleName" class="form-label">Middle Name</label>
-                        <input type="text" class="form-control" id="middleName" name="middleName">
+                        <input type="text" class="form-control" id="middleName" name="middleName" required>
                     </div>
                     <div class="col-12 col-md-6">
                         <label for="lastName" class="form-label">Last Name</label>
@@ -130,7 +130,7 @@ if (file_exists($jsonPath)) {
                     <div class="col-12 col-md-6">
                         <label for="school" class="form-label">School</label>
                         <select name="school" id="school" class="form-select" required>
-                            <option disabled selected>Select your school...</option>
+                            <option value="" selected disabled>Select your school...</option>
                             <!-- Carlos Hilado Memorial State University (CHMSU) -->
                             <option value="CHMSU-TALISAY">CHMSU – Talisay (Main Campus)</option>
                             <option value="CHMSU-ALIJIS">CHMSU – Alijis Campus</option>
@@ -211,7 +211,6 @@ if (file_exists($jsonPath)) {
                             <option value="ACSAT-DUMAGUETE">Asian College of Science & Tech – Dumaguete </option>
                             <option value="STI-DUMAGUETE">STI College – Dumaguete</option>
                         </select>
-                        </select>
                     </div>
                     <div class="col-12 col-md-6">
                         <label for="course" class="form-label">Course</label>
@@ -230,7 +229,7 @@ if (file_exists($jsonPath)) {
                     <div class="col-12 col-md-6">
                         <label for="address" class="form-label">Barangay</label>
                         <select class="form-select" name="address" id="address" required>
-                            <option disabled selected>Select barangay.
+                            <option value="" selected disabled>Select barangay...</option>
                             <option value="BARANGAY 1">BARANGAY 1</option>
                             <option value="BARANGAY 2">BARANGAY 2</option>
                             <option value="BARANGAY 3">BARANGAY 3</option>

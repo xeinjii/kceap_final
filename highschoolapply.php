@@ -116,7 +116,7 @@ if (file_exists($jsonPath)) {
                 <h2 class="mb-3 mb-md-0">Scholarship Application Form</h2>
             </div>
 
-            <form action="highschool_apply_process.php" method="POST">
+            <form id="hsForm" action="highschool_apply_process.php" method="POST">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
                         <label for="firstName" class="form-label">First Name</label>
@@ -124,7 +124,7 @@ if (file_exists($jsonPath)) {
                     </div>
                     <div class="col-12 col-md-6">
                         <label for="middleName" class="form-label">Middle Name</label>
-                        <input type="text" class="form-control" id="middleName" name="middleName">
+                        <input type="text" class="form-control" id="middleName" name="middleName" required>
                     </div>
                     <div class="col-12 col-md-6">
                         <label for="lastName" class="form-label">Last Name</label>
@@ -164,7 +164,7 @@ if (file_exists($jsonPath)) {
                     <div class="col-12 col-md-6">
                         <label for="address" class="form-label">Barangay</label>
                         <select class="form-select" name="address" id="address" required>
-                            <option disabled selected>Select barangay...</option>
+                            <option value="" selected disabled>Select barangay...</option>
                             <option value="BARANGAY 1">BARANGAY 1</option>
                             <option value="BARANGAY 2">BARANGAY 2</option>
                             <option value="BARANGAY 3">BARANGAY 3</option>

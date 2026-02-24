@@ -216,68 +216,93 @@ $result = $conn->query($sql);
         </div>
     </section>
 
-    <!-- Action Confirmation Modal -->
-    <div class="modal fade" id="actionModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
+    <!-- Action Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="exam_list_process.php">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Action</h5>
+                    <h5 class="modal-title" id="actionModalLabel">Confirm Action</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-                    <p id="modalMessage">Are you sure?</p>
+                    <p>Are you sure you want to 
+                        <strong><span id="modalAction"></span></strong> 
+                        this applicant?
+                    </p>
+
+                    <!-- Hidden Fields -->
+                    <input type="hidden" name="id" id="modalApplicantId">
+                    <input type="hidden" name="action" id="modalActionInput">
+
+                    <!-- Date Wrapper - Only shown for Accept action -->
+                    <div id="scheduleFields" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Upload documents before:</strong>
+                        </div>
+
+                        <!-- Date Input -->
+                        <div class="mb-3">
+                            <label class="form-label">Select Deadline Date</label>
+                            <input type="date" name="expire_date" id="expireDate" class="form-control" 
+                                   min="<?php echo date('Y-m-d'); ?>">
+                        </div>
+                    </div>
+
+                    <!-- Message Input -->
+                    <div class="mb-3">
+                        <label class="form-label">Message (Optional)</label>
+                        <textarea name="message" class="form-control" rows="3" 
+                                  placeholder="Enter additional instructions..."></textarea>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
-                    <form id="actionForm" method="GET" action="exam_list_process.php">
-                        <input type="hidden" name="id" id="modalId">
-                        <input type="hidden" name="action" id="modalAction">
-
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary" id="confirmBtn">
-                            Confirm
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="confirmActionBtn" class="btn btn-primary">Yes, Confirm</button>
                 </div>
-
-            </div>
+            </form>
         </div>
     </div>
+</div>
 
 
 
     <script>
-        function handleAction(id, action) {
-            if (confirm(`Are you sure you want to ${action} this applicant?`)) {
-                window.location.href = `exam_list_process.php?id=${id}&action=${action}`;
-            }
+    var actionModal = document.getElementById('actionModal');
+    
+    actionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+        var action = button.getAttribute('data-action');
+        
+        // Update modal text
+        document.getElementById('modalAction').textContent = action;
+        
+        // Set hidden inputs
+        document.getElementById('modalApplicantId').value = id;
+        document.getElementById('modalActionInput').value = action;
+        
+        // Show/hide schedule fields based on action
+        var scheduleFields = document.getElementById('scheduleFields');
+        if (action === 'accept') {
+            scheduleFields.style.display = 'block';
+            // Set default deadline to 7 days from now
+            var today = new Date();
+            var deadline = new Date(today.setDate(today.getDate() + 7));
+            document.getElementById('expireDate').value = deadline.toISOString().split('T')[0];
+        } else {
+            scheduleFields.style.display = 'none';
         }
-    </script>
-
-    <script>
-        var actionModal = document.getElementById('actionModal');
-
-        actionModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget; // Button that triggered modal
-            var id = button.getAttribute('data-id');
-            var action = button.getAttribute('data-action');
-
-            var modalMessage = action === 'accept'
-                ? "Are you sure you want to ACCEPT this applicant?"
-                : "Are you sure you want to REJECT this applicant?";
-
-            document.getElementById('modalMessage').innerText = modalMessage;
-            document.getElementById('modalId').value = id;
-            document.getElementById('modalAction').value = action;
-
-            var confirmBtn = document.getElementById('confirmBtn');
-            confirmBtn.className = action === 'accept' ? "btn btn-success" : "btn btn-danger";
-        });
-    </script>
+        
+        // Change button color
+        var confirmBtn = document.getElementById('confirmActionBtn');
+        confirmBtn.className = action === 'accept' ? 
+            'btn btn-success' : 
+            'btn btn-danger';
+    });
+</script>
 
 
 

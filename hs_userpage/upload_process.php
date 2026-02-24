@@ -40,7 +40,16 @@ if (!empty($_FILES['documents']['name'][0])) {
         }
     }
     if ($success_count > 0) {
-        $_SESSION['message'] = "$success_count file(s) uploaded successfully.";
+        // Clear upload deadline if at least one file uploaded
+        $account_id = $_SESSION['id'] ?? null;
+        if ($account_id) {
+            $upd = $conn->prepare("UPDATE highschool_account SET upload_deadline = NULL WHERE id = ?");
+            $upd->bind_param("i", $account_id);
+            $upd->execute();
+            $upd->close();
+        }
+
+        $_SESSION['message'] = "$success_count file(s) uploaded successfully. Upload deadline cleared.";
         $_SESSION['message_type'] = 'success';
     }
     if (!empty($error_msgs)) {

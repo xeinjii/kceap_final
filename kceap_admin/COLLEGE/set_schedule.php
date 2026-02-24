@@ -158,7 +158,7 @@ $appliedCount = $result ? $result->num_rows : 0;
 
                 <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-bordered table-hover table-striped align-middle">
-                        <thead class="table-primary" style="position: sticky; top: 0; z-index: 2;">
+                        <thead class="" style="position: sticky; top: 0; z-index: 2;">
                             <tr>
                                 <th>#</th>
                                 <th>First Name</th>

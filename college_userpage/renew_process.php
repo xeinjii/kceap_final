@@ -91,6 +91,15 @@ if ($files_key) {
     if ($success_count > 0) {
         $_SESSION['message'] = "$success_count file(s) uploaded successfully.";
         $_SESSION['message_type'] = 'success';
+        // Remove upload_deadline after successful submission
+        if (!empty($applicant_id)) {
+            $u = $conn->prepare("UPDATE college_account SET upload_deadline = NULL WHERE applicant_id = ?");
+            if ($u) {
+                $u->bind_param('i', $applicant_id);
+                $u->execute();
+                $u->close();
+            }
+        }
     }
     if (!empty($error_msgs)) {
         $_SESSION['message'] = implode(' ', $error_msgs);

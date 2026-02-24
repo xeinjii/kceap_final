@@ -12,21 +12,21 @@ if (!isCollegeApplicationEnabled()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ---------------- SANITIZE INPUTS ----------------
-    $firstName     = trim($_POST['firstName']);
-    $middleName    = trim($_POST['middleName']);
-    $lastName      = trim($_POST['lastName']);
-    $school        = trim($_POST['school']);
-    $course        = trim($_POST['course']);
-    $yearLevel     = trim($_POST['yearLevel']);
-    $address       = trim($_POST['address']);
-    $phoneNumber   = trim($_POST['phoneNumber']);
-    $emailAddress  = trim($_POST['emailAddress']);
+    $firstName = trim($_POST['firstName']);
+    $middleName = trim($_POST['middleName']);
+    $lastName = trim($_POST['lastName']);
+    $school = trim($_POST['school']);
+    $course = trim($_POST['course']);
+    $yearLevel = trim($_POST['yearLevel']);
+    $address = trim($_POST['address']);
+    $phoneNumber = trim($_POST['phoneNumber']);
+    $emailAddress = trim($_POST['emailAddress']);
 
     $emailAddress = filter_var($emailAddress, FILTER_SANITIZE_EMAIL);
 
     if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['college_apply_error'] = "Invalid email address format.";
-        header("Location: index.php");
+        header("Location: collegeapply.php");
         exit();
     }
 
@@ -34,22 +34,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dummyEmails = ['test@gmail.com', 'dummy@gmail.com', 'example@example.com'];
     $dummyDomains = ['mailinator.com', 'tempmail.com', '10minutemail.com', 'dispostable.com'];
 
-    function isSuspiciousEmail($email, $dummyEmails, $dummyDomains) {
+    function isSuspiciousEmail($email, $dummyEmails, $dummyDomains)
+    {
         $email = strtolower(trim($email));
-        if (in_array($email, $dummyEmails)) return true;
+        if (in_array($email, $dummyEmails))
+            return true;
         $domain = substr(strrchr($email, "@"), 1);
-        if (in_array($domain, $dummyDomains)) return true;
+        if (in_array($domain, $dummyDomains))
+            return true;
         $username = strstr($email, '@', true);
-        if (preg_match('/^\d+$/', $username)) return true;
-        if (preg_match('/^(.)\1+$/', $username)) return true;
+        if (preg_match('/^\d+$/', $username))
+            return true;
+        if (preg_match('/^(.)\1+$/', $username))
+            return true;
         return false;
     }
 
-    function isSuspiciousPhone($phone) {
+    function isSuspiciousPhone($phone)
+    {
         $phone = preg_replace('/\D/', '', $phone);
-        if (strlen($phone) !== 11) return true;
-        if (preg_match('/^(.)\1+$/', $phone)) return true;
-        if (preg_match('/^09(0{9,}|1{9,}|2{9,})$/', $phone)) return true;
+        if (strlen($phone) !== 11)
+            return true;
+        if (preg_match('/^(.)\1+$/', $phone))
+            return true;
+        if (preg_match('/^09(0{9,}|1{9,}|2{9,})$/', $phone))
+            return true;
         return false;
     }
 
@@ -61,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isSuspiciousPhone($phoneNumber)) {
         $_SESSION['college_apply_error'] = "Please enter a valid 11-digit phone number.";
-        header("Location: index.php");
+        header("Location: collegeapply.php");
         exit();
     }
 
@@ -87,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($checkAccount->num_rows > 0) {
         $_SESSION['college_apply_error'] = "This email is already registered.";
         $checkAccount->close();
-        header("Location: index.php");
+        header("Location: collegeapply.php");
         exit();
     }
     $checkAccount->close();
@@ -127,7 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentCount = $countResult->fetch_assoc()['total'];
 
                 if ($currentCount >= $collegeLimit) {
-                    $_SESSION['limit_reached'] = 'college';
                     $_SESSION['college_apply_success'] =
                         'Your application has been submitted successfully! College application limit has now been reached.';
                 }
@@ -144,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['college_apply_error'] = 'There was an error submitting your application.';
         $stmt->close();
         $conn->close();
-        header('Location: index.php');
+        header('Location: collegeapply.php');
         exit();
     }
 }

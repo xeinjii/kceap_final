@@ -5,79 +5,92 @@ session_start();
 
 if (!isHighSchoolApplicationEnabled()) {
     $_SESSION['highschool_apply_error'] = "Sorry, high school applications are currently closed.";
-    header("Location: index.php");
+    header("Location: highschoolapply.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ---------------- SANITIZE INPUTS ----------------
-    $firstName     = trim($_POST['firstName'] ?? '');
-    $middleName    = trim($_POST['middleName'] ?? '');
-    $lastName      = trim($_POST['lastName'] ?? '');
-    $school        = trim($_POST['school'] ?? '');
-    $strand        = trim($_POST['strand'] ?? '');
-    $yearLevel     = trim($_POST['yearLevel'] ?? '');
-    $address       = trim($_POST['address'] ?? '');
-    $phoneNumber   = trim($_POST['phoneNumber'] ?? '');
-    $emailAddress  = trim($_POST['emailAddress'] ?? '');
+    $firstName = trim($_POST['firstName'] ?? '');
+    $middleName = trim($_POST['middleName'] ?? '');
+    $lastName = trim($_POST['lastName'] ?? '');
+    $school = trim($_POST['school'] ?? '');
+    $strand = trim($_POST['strand'] ?? '');
+    $yearLevel = trim($_POST['yearLevel'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $phoneNumber = trim($_POST['phoneNumber'] ?? '');
+    $emailAddress = trim($_POST['emailAddress'] ?? '');
 
     $emailAddress = filter_var($emailAddress, FILTER_SANITIZE_EMAIL);
 
     if (!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['highschool_apply_error'] = "Invalid email address format.";
-        header("Location: index.php");
+        header("Location: highschoolapply.php");
         exit();
     }
 
     // ---------------- EMAIL VALIDATION ----------------
-    $blockedEmailUsernames = ['test','dummy','admin','user','example','sample'];
+    $blockedEmailUsernames = ['test', 'dummy', 'admin', 'user', 'example', 'sample'];
     $blockedDomains = [
-        'mailinator.com','tempmail.com','10minutemail.com',
-        'dispostable.com','guerrillamail.com','yopmail.com'
+        'mailinator.com',
+        'tempmail.com',
+        '10minutemail.com',
+        'dispostable.com',
+        'guerrillamail.com',
+        'yopmail.com'
     ];
 
-    function isSuspiciousEmail($email, $blockedEmailUsernames, $blockedDomains) {
+    function isSuspiciousEmail($email, $blockedEmailUsernames, $blockedDomains)
+    {
 
         $email = strtolower(trim($email));
 
-        if (!str_contains($email, '@')) return true;
+        if (!str_contains($email, '@'))
+            return true;
 
         list($username, $domain) = explode('@', $email);
 
-        if (in_array($domain, $blockedDomains)) return true;
+        if (in_array($domain, $blockedDomains))
+            return true;
 
-        if (preg_match('/^\d+$/', $username)) return true;
+        if (preg_match('/^\d+$/', $username))
+            return true;
 
-        if (preg_match('/^(.)\1{4,}$/', $username)) return true;
+        if (preg_match('/^(.)\1{4,}$/', $username))
+            return true;
 
         foreach ($blockedEmailUsernames as $word) {
-            if (strpos($username, $word) !== false) return true;
+            if (strpos($username, $word) !== false)
+                return true;
         }
 
         return false;
     }
 
-    function isSuspiciousPhone($phone) {
+    function isSuspiciousPhone($phone)
+    {
 
         $phone = preg_replace('/\D/', '', $phone);
 
-        if (!preg_match('/^09\d{9}$/', $phone)) return true;
+        if (!preg_match('/^09\d{9}$/', $phone))
+            return true;
 
-        if (preg_match('/^(.)\1{10}$/', $phone)) return true;
+        if (preg_match('/^(.)\1{10}$/', $phone))
+            return true;
 
         return false;
     }
 
     if (isSuspiciousEmail($emailAddress, $blockedEmailUsernames, $blockedDomains)) {
         $_SESSION['highschool_apply_error'] = "Please use a valid email address.";
-        header("Location: index.php");
+        header("Location: highschoolapply.php");
         exit();
     }
 
     if (isSuspiciousPhone($phoneNumber)) {
         $_SESSION['highschool_apply_error'] = "Please enter a valid 11-digit mobile number starting with 09.";
-        header("Location: index.php");
+        header("Location: highschoolapply.php");
         exit();
     }
 
@@ -90,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($checkSchedule->num_rows > 0) {
         $_SESSION['highschool_apply_error'] = "This email is already used.";
         $checkSchedule->close();
-        header("Location: index.php");
+        header("Location: highschoolapply.php");
         exit();
     }
     $checkSchedule->close();
@@ -103,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($checkAccount->num_rows > 0) {
         $_SESSION['highschool_apply_error'] = "This email is already registered.";
         $checkAccount->close();
-        header("Location: index.php");
+        header("Location: highschoolapply.php");
         exit();
     }
     $checkAccount->close();
@@ -144,7 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentCount = $countResult->fetch_assoc()['total'];
 
                 if ($currentCount >= $hsLimit) {
-                    $_SESSION['limit_reached'] = 'highschool';
                     $_SESSION['highschool_apply_success'] =
                         "Your application has been submitted successfully! High school limit has now been reached.";
                 }
@@ -164,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         $conn->close();
 
-        header("Location: index.php");
+        header("Location: highschoolapply.php");
         exit();
     }
 }

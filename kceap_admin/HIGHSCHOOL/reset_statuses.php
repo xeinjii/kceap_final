@@ -10,6 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Capture optional upload deadline (date-only, will be stored as end-of-day)
+$upload_deadline = null;
+if (isset($_POST['expire_date']) && !empty($_POST['expire_date'])) {
+    $expire_date = $_POST['expire_date'];
+    $upload_deadline = $expire_date . ' 23:59:00';
+}
+
 /* ======================================================
    1️⃣ GRADUATE GRADE 12 - 2ND SEMESTER STUDENTS
 ====================================================== */
@@ -139,7 +146,11 @@ if ($archive_result && $archive_result->num_rows > 0) {
    3️⃣ RESET REMAINING STUDENTS (DO NOT CHANGE YEAR LEVEL)
 ====================================================== */
 
+// Build update SQL with optional upload_deadline
 $reset_sql = "UPDATE highschool_account SET status = 'pending'";
+if ($upload_deadline) {
+    $reset_sql .= ", upload_deadline = '" . $conn->real_escape_string($upload_deadline) . "'";
+}
 
 if ($conn->query($reset_sql) === TRUE) {
 
@@ -164,11 +175,20 @@ if ($conn->query($reset_sql) === TRUE) {
                 $mail = getMailer();
                 $mail->addAddress($toEmail, $toName);
                 $mail->Subject = 'KCEAP - Account Status Reset';
+                
+                $deadline_text = '';
+                if ($upload_deadline) {
+                    $deadline_date = new DateTime($upload_deadline);
+                    $deadline_text = '<p><strong>Upload Deadline:</strong> ' . 
+                                    $deadline_date->format('F j, Y') . '</p>';
+                }
+                
                 $mail->Body = "
-                    Dear " . htmlspecialchars($row['first_name']) . ",<br><br>
-                    Your scholar status has been reset and your renewal is now pending.
-                    Please log in to your account to complete required steps.<br><br>
-                    Thank you,<br>KCEAP Team
+                    <p>Dear " . htmlspecialchars($row['first_name']) . ",</p>
+                    <p>Your scholar status has been reset and your renewal is now pending.</p>
+                    {$deadline_text}
+                    <p>Please log in to your account to complete required steps.</p>
+                    <p>Thank you,<br>KCEAP Team</p>
                 ";
                 $mail->isHTML(true);
                 $mail->send();
@@ -183,6 +203,11 @@ if ($conn->query($reset_sql) === TRUE) {
     }
 
     $msg = "All applicant statuses have been reset to pending.";
+
+    if ($upload_deadline) {
+        $deadline_date = new DateTime($upload_deadline);
+        $msg .= " Upload deadline set to " . $deadline_date->format('F j, Y') . ".";
+    }
 
     if ($archived_count > 0) {
         $msg .= " $archived_count Grade 12, 2nd semester student(s) archived.";

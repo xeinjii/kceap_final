@@ -126,7 +126,7 @@ if (!empty($applicant_id)) {
   if ($stmt->fetch()) {
     $status_l = strtolower(trim($status));
     // disable submit when status is 'pending', 'active', or 'incomplete'
-    $submitDisabled = in_array($status_l, ['pending', 'active', 'waiting for results']);
+    $submitDisabled = in_array($status_l, ['pending', 'active', 'waiting for results', 'expired']);
   }
   $stmt->close();
 }

@@ -521,7 +521,7 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
 
-                    <div class="modal-header bg-success text-white">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
                             <i class="fa-solid fa-circle-check me-2"></i>
                             Application Submitted Successfully
@@ -530,7 +530,7 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                     </div>
 
                     <div class="modal-body text-center py-4">
-                        <span class="material-symbols-outlined fs-1 text-success mb-3">
+                        <span class="material-symbols-outlined fs-1 text-primary mb-3">
                             check_circle
                         </span>
 
@@ -544,7 +544,7 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                     </div>
 
                     <div class="modal-footer justify-content-center">
-                        <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">
                             Okay
                         </button>
                     </div>
@@ -563,37 +563,13 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
         <?php unset($_SESSION['college_apply_success']); ?>
     <?php endif; ?>
 
-    <?php if (isset($_SESSION['applyfailed'])): ?>
-        <div class="modal fade" id="failedModal" tabindex="-1" aria-labelledby="failedModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-danger">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="failedModalLabel">Application Failed</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <span class="material-symbols-outlined fs-1 text-danger mb-2">error</span>
-                        <?= $_SESSION['applyfailed'] ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var failedModal = new bootstrap.Modal(document.getElementById('failedModal'));
-                failedModal.show();
-            });
-        </script>
-        <?php unset($_SESSION['applyfailed']); ?>
-    <?php endif; ?>
 
     <?php if (isset($_SESSION['highschool_apply_success'])): ?>
         <div class="modal fade" id="hsSuccessModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
 
-                    <div class="modal-header bg-success text-white">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
                             <i class="fa-solid fa-circle-check me-2"></i>
                             High School Application Submitted
@@ -602,7 +578,7 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                     </div>
 
                     <div class="modal-body text-center py-4">
-                        <span class="material-symbols-outlined fs-1 text-success mb-3">
+                        <span class="material-symbols-outlined fs-1 text-primary mb-3">
                             check_circle
                         </span>
 
@@ -616,7 +592,7 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
                     </div>
 
                     <div class="modal-footer justify-content-center">
-                        <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">
                             Okay
                         </button>
                     </div>
@@ -634,45 +610,6 @@ $hsDeadlineFormatted = $hsDeadline ? $hsDeadline->format('F j, Y - g:i A') : '';
 
         <?php unset($_SESSION['highschool_apply_success']); ?>
     <?php endif; ?>
-
-    <?php if (isset($_SESSION['limit_reached'])): ?>
-        <div class="modal fade" id="limitReachedModal" tabindex="-1" aria-labelledby="limitReachedModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-warning">
-                    <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title" id="limitReachedModalLabel">Applications Full</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <span class="material-symbols-outlined fs-1 text-warning mb-2">info</span>
-                        <p class="mb-0">
-                            <?php if ($_SESSION['limit_reached'] === 'college'): ?>
-                                <strong>College Application Limit Reached</strong><br><br>
-                                Thank you for your application! The college application slots have been filled to capacity. No
-                                further college applications will be accepted at this time.
-                            <?php elseif ($_SESSION['limit_reached'] === 'highschool'): ?>
-                                <strong>High School Application Limit Reached</strong><br><br>
-                                Thank you for your application! The high school application slots have been filled to capacity.
-                                No further high school applications will be accepted at this time.
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var limitReachedModal = new bootstrap.Modal(document.getElementById('limitReachedModal'));
-                limitReachedModal.show();
-            });
-        </script>
-        <?php unset($_SESSION['limit_reached']); ?>
-    <?php endif; ?>
-
 
 
 

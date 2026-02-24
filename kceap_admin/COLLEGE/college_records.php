@@ -7,8 +7,8 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-// Fetch all college accounts
-$sql = "SELECT * FROM college_account ORDER BY applicant_id ASC";
+// Fetch all college accounts with active status only
+$sql = "SELECT * FROM college_account WHERE status = 'active' ORDER BY applicant_id ASC";
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -33,23 +33,19 @@ $result = $conn->query($sql);
             font-size: 1.2rem;
         }
 
-        .table {
-            width: 400px;
-        }
-
         .table th,
         .table td {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             vertical-align: middle;
-            max-width: 300px;
+            max-width: 200px;
             font-size: 0.85rem;
         }
 
         .table td:nth-child(8),
         .table td:nth-child(10) {
-            max-width: 300px;
+            max-width: 200px;
         }
 
         .table thead {
@@ -142,7 +138,7 @@ $result = $conn->query($sql);
                     </div>
                 </div>
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-bordered table-hover table-striped align-middle">
+                    <table class="table table-bordered table-hover table-striped align-middle" >
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -378,8 +374,8 @@ $result = $conn->query($sql);
                                 <label class="form-label">Semester</label>
                                 <select name="semester" class="form-select" required>
                                     <option value="" selected disabled>Select Semester</option>
-                                    <option value="1st Semester">1st Semester</option>
-                                    <option value="2nd Semester">2nd Semester</option>
+                                    <option value="1st semester">1st Semester</option>
+                                    <option value="2nd semester">2nd Semester</option>
                                 </select>
                             </div>
 
@@ -437,7 +433,7 @@ $result = $conn->query($sql);
 
                             <div class="col-md-6">
                                 <label class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" name="phone_number" id="edit-phone"
+                                <input type="tel" class="form-control" name="phone_number" id="add-phone"
                                     pattern="[0-9]{11}" maxlength="11" placeholder="Enter 11-digit number" required
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                 <div class="form-text">Phone number must be exactly 11 digits.</div>
@@ -602,8 +598,8 @@ $result = $conn->query($sql);
                             <label class="form-label">Semester</label>
                             <select name="semester" id="edit-semester" class="form-select" required>
                                 <option value="" disabled>Select Semester</option>
-                                <option value="1st Semester">1st Semester</option>
-                                <option value="2nd Semester">2nd Semester</option>
+                                <option value="1st semester">1st Semester</option>
+                                <option value="2nd semester">2nd Semester</option>
                             </select>
                         </div>
 
@@ -721,6 +717,11 @@ $result = $conn->query($sql);
                     <p>Are you sure you want to reset <strong>all applicant statuses</strong> to
                         <strong>pending</strong>? This action cannot be undone.
                     </p>
+                    <div class="mt-3">
+                        <label class="form-label">Set upload deadline date (optional)</label>
+                        <input type="date" name="upload_deadline_date" class="form-control" min="<?php echo date('Y-m-d'); ?>">
+                        <div class="form-text">Admin may set a deadline date; time defaults to 23:59.</div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -734,25 +735,32 @@ $result = $conn->query($sql);
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const editButtons = document.querySelectorAll('.edit-btn');
-        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButtons = document.querySelectorAll('.edit-btn');
+            const editModalElement = document.getElementById('editModal');
+            const editModal = new bootstrap.Modal(editModalElement);
 
-        editButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                document.getElementById('edit-id').value = button.dataset.id;
-                document.getElementById('edit-first').value = button.dataset.first;
-                document.getElementById('edit-middle').value = button.dataset.middle;
-                document.getElementById('edit-last').value = button.dataset.last;
-                document.getElementById('edit-school').value = button.dataset.school;
-                document.getElementById('edit-course').value = button.dataset.course;
-                document.getElementById('edit-year').value = button.dataset.year;
-                document.getElementById('edit-address').value = button.dataset.address;
-                document.getElementById('edit-phone').value = button.dataset.phone;
-                document.getElementById('edit-email').value = button.dataset.email;
-                document.getElementById('edit-status').value = button.dataset.status;
-                document.getElementById('edit-semester').value = button.dataset.semester || '';
+            editButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Populate form fields with data from button attributes
+                    document.getElementById('edit-id').value = this.dataset.id || '';
+                    document.getElementById('edit-first').value = this.dataset.first || '';
+                    document.getElementById('edit-middle').value = this.dataset.middle || '';
+                    document.getElementById('edit-last').value = this.dataset.last || '';
+                    document.getElementById('edit-school').value = this.dataset.school || '';
+                    document.getElementById('edit-course').value = this.dataset.course || '';
+                    document.getElementById('edit-year').value = this.dataset.year || '';
+                    document.getElementById('edit-address').value = this.dataset.address || '';
+                    document.getElementById('edit-phone').value = this.dataset.phone || '';
+                    document.getElementById('edit-email').value = this.dataset.email || '';
+                    document.getElementById('edit-status').value = this.dataset.status || '';
+                    document.getElementById('edit-semester').value = this.dataset.semester || '';
 
-                editModal.show();
+                    // Show the modal
+                    editModal.show();
+                });
             });
         });
     </script>

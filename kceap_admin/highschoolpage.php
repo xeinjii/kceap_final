@@ -17,7 +17,7 @@ if (!isset($_SESSION['admin_id'])) {
                 <h2 class="mb-0">High School Management</h2>
                 <p class="text-muted mb-0">Manage high school applicants, schedules, and records</p>
             </div>
-            <div class="container py-5"> 
+            <div class="container py-2"> 
                 <div class="row g-4">
                      
                     <div class="col-md-3">
@@ -61,6 +61,18 @@ if (!isset($_SESSION['admin_id'])) {
                                     <span class="material-icons fs-1 text-secondary">folder_special</span>
                                     <h5 class="card-title mt-2">Records</h5>
                                     <p class="text-muted small">View all applicant records</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Expired Applicants Card -->
+                    <div class="col-md-3">
+                        <a href="../kceap_admin/HIGHSCHOOL/expired.php" class="text-decoration-none text-reset">
+                            <div class="card folder-card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <span class="material-icons fs-1 text-danger">report_problem</span>
+                                    <h5 class="card-title mt-2">Expired Applicants</h5>
+                                    <p class="text-muted small">View applicants with expired deadlines</p>
                                 </div>
                             </div>
                         </a>
